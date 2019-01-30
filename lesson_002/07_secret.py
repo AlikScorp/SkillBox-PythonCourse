@@ -28,3 +28,5 @@ fourth = secret_message[3][12:6:-1]
 fifth = secret_message[4][20:15:-1]
 
 print(first, second, third, fourth, fifth)
+
+# зачет!

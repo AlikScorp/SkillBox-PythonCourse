@@ -18,3 +18,5 @@ print("Первый фильм:", my_favorite_movies[:10])
 print("Последний фильм:", my_favorite_movies[-15:])
 print("Второй фильм:", my_favorite_movies[12:25])
 print("Второй с конца фильм:", my_favorite_movies[-22:-17])
+
+# зачет!

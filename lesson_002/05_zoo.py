@@ -30,4 +30,6 @@ print(zoo)
 print('Лев в клетке №', zoo.index('lion')+1, sep='')
 print('Жаворонок в клетке №', zoo.index('lark')+1, sep='')
 
+# зачет!
+
 
