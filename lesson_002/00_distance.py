@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Есть словарь координат городов
+from pprint import pprint
 
 sites = {
     'Moscow': (550, 370),
@@ -14,9 +15,37 @@ sites = {
 
 distances = {}
 
-# TODO здесь заполнение словаря
+moscow = sites['Moscow']
+london = sites['London']
+paris = sites['Paris']
 
-print(distances)
+moscow_london = ((moscow[0]-london[0])**2 + (moscow[1]-london[1])**2)**0.5
+moscow_paris = ((moscow[0]-paris[0])**2 + (moscow[1]-paris[1])**2)**0.5
+london_paris = ((london[0]-paris[0])**2 + (london[1]-paris[1])**2)**0.5
+
+london_moscow = moscow_london
+paris_london = london_paris
+paris_moscow = moscow_paris
+
+distances['Moscow'] = {}
+distances['Moscow']['London'] = moscow_london
+distances['Moscow']['Paris'] = moscow_paris
+
+distances['London'] = {}
+distances['London']['Moscow'] = london_moscow
+distances['London']['Paris'] = london_paris
+
+
+distances['Paris'] = {}
+distances['Paris']['Moscow'] = paris_moscow
+distances['Paris']['London'] = paris_london
+
+
+# print(distances)
+
+pprint(distances)
+
+
 
 
 
