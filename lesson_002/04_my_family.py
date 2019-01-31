@@ -27,3 +27,5 @@ print("Рост отца -", father_height, "см.")
 total_height = my_family_height[0][height] + my_family_height[1][height] + my_family_height[2][height] + \
                my_family_height[3][height] + my_family_height[4][height]
 print("Общий рост моей семьи -", total_height, "см.")
+
+# зачет!

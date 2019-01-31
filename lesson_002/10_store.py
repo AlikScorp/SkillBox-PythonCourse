@@ -76,9 +76,10 @@ print('Диван -', sofa_quantity, 'шт, стоимость', sofa_cost, 'р�
 chair_code = goods['Стул']
 chair_item = store[chair_code]
 chair_quantity = chair_item[0]['quantity'] + chair_item[1]['quantity'] + chair_item[2]['quantity']
-chair_cost = chair_item[0]['price']*chair_item[0]['quantity'] + \
-             chair_item[1]['price']*chair_item[1]['quantity'] + \
-             chair_item[2]['price']*chair_item[2]['quantity']
+# В PEP8 рекомендуется форматировать так
+chair_cost = (chair_item[0]['price']*chair_item[0]['quantity']
+              + chair_item[1]['price']*chair_item[1]['quantity']
+              + chair_item[2]['price']*chair_item[2]['quantity'])
 
 print('Стул -', chair_quantity, 'шт, стоимость', chair_cost, 'руб')
 
@@ -88,3 +89,5 @@ print('Стул -', chair_quantity, 'шт, стоимость', chair_cost, 'р�
 # и оформить попытку сдачи ДЗ! Без этого ДЗ не будет проверяться!                        #
 # Как оформить попытку сдачи смотрите видео - https://youtu.be/qVpN0L-C3LU               #
 ##########################################################################################
+
+# зачет!
