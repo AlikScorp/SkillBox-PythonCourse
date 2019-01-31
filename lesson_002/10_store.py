@@ -49,40 +49,36 @@ print('Лампа -', lamps_quantity, 'шт, стоимость', lamps_cost, '�
 # WARNING для знающих циклы: БЕЗ циклов. Да, с переменными; да, неэффективно; да, копипаста.
 # Это задание на ручное вычисление - что бы потом понять как работают циклы и насколько с ними проще жить.
 
-# TODO Используйте для вычисления table_cost table_item
-table_cost = store[goods['Стол']][0]['quantity'] * store[goods['Стол']][0]['price'] + \
-             store[goods['Стол']][1]['quantity'] * store[goods['Стол']][1]['price']
+# table_cost = store[goods['Стол']][0]['quantity'] * store[goods['Стол']][0]['price'] + \
+#              store[goods['Стол']][1]['quantity'] * store[goods['Стол']][1]['price']
 
 table_code = goods['Стол']
 table_item = store[table_code]
 table_quantity = table_item[0]['quantity'] + table_item[1]['quantity']
-# table_cost = table_item[0]['price']*table_item[0]['quantity'] + table_item[1]['price']*table_item[1]['quantity']
+table_cost = table_item[0]['price']*table_item[0]['quantity'] + table_item[1]['price']*table_item[1]['quantity']
 
 print('Стол -', table_quantity, 'шт, стоимость', table_cost, 'руб')
 
-# TODO Используйте для вычисления sofa_cost sofa_item
-sofa_cost = store[goods['Диван']][0]['quantity'] * store[goods['Диван']][0]['price'] + \
-            store[goods['Диван']][1]['quantity'] * store[goods['Диван']][1]['price']
+# sofa_cost = store[goods['Диван']][0]['quantity'] * store[goods['Диван']][0]['price'] + \
+#             store[goods['Диван']][1]['quantity'] * store[goods['Диван']][1]['price']
 
 sofa_code = goods['Диван']
 sofa_item = store[sofa_code]
 sofa_quantity = sofa_item[0]['quantity'] + sofa_item[1]['quantity']
-# sofa_cost = sofa_item[0]['price']*sofa_item[0]['quantity'] + sofa_item[1]['price']*sofa_item[1]['quantity']
+sofa_cost = sofa_item[0]['price']*sofa_item[0]['quantity'] + sofa_item[1]['price']*sofa_item[1]['quantity']
 
 print('Диван -', sofa_quantity, 'шт, стоимость', sofa_cost, 'руб')
 
-# TODO Исправьте аналогично предыдущим товарам.
-chair_cost = store[goods['Стул']][0]['quantity'] * store[goods['Стул']][0]['price'] + \
-             store[goods['Стул']][1]['quantity'] * store[goods['Стул']][1]['price'] + \
-             store[goods['Стул']][2]['quantity'] * store[goods['Стул']][2]['price']
+# chair_cost = store[goods['Стул']][0]['quantity'] * store[goods['Стул']][0]['price'] + \
+#              store[goods['Стул']][1]['quantity'] * store[goods['Стул']][1]['price'] + \
+#              store[goods['Стул']][2]['quantity'] * store[goods['Стул']][2]['price']
 
-# TODO Исправьте аналогично предыдущим товарам.
 chair_code = goods['Стул']
 chair_item = store[chair_code]
 chair_quantity = chair_item[0]['quantity'] + chair_item[1]['quantity'] + chair_item[2]['quantity']
-# chair_cost = chair_item[0]['price']*chair_item[0]['quantity'] + \
-#              chair_item[1]['price']*chair_item[1]['quantity'] + \
-#              chair_item[2]['price']*chair_item[2]['quantity']
+chair_cost = chair_item[0]['price']*chair_item[0]['quantity'] + \
+             chair_item[1]['price']*chair_item[1]['quantity'] + \
+             chair_item[2]['price']*chair_item[2]['quantity']
 
 print('Стул -', chair_quantity, 'шт, стоимость', chair_cost, 'руб')
 
