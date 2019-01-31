@@ -4,10 +4,10 @@
 # Создайте списки:
 
 # моя семья (минимум 3 элемента, есть еще дедушки и бабушки, если что)
-# TODO не уверен, что я правильно заполнил список, возможно здесь тоже нужны имена
 
 my_family = ['Отец', 'Мать', 'Старший сын', 'Средний сын', 'Младший сын']
-
+name = 0
+height = 1
 
 # список списков приблизителного роста членов вашей семьи
 my_family_height = [
@@ -17,8 +17,13 @@ my_family_height = [
 
 # Выведите на консоль рост отца в формате
 #   Рост отца - ХХ см
-print("Рост отца -", my_family_height[0][1], "см.")
+
+father_height = my_family_height[my_family.index('Отец')][height]
+
+print("Рост отца -", father_height, "см.")
 # Выведите на консоль общий рост вашей семьи как сумму ростов всех членов
 #   Общий рост моей семьи - ХХ см
-# TODO Обратите внимание, что делать много вычислений внутри print() - плохой стиль.
-print("Общий рост моей семьи -", my_family_height[0][1] + my_family_height[1][1] + my_family_height[2][1]+my_family_height[3][1]+my_family_height[4][1], "см.")
+
+total_height = my_family_height[0][height] + my_family_height[1][height] + my_family_height[2][height] + \
+               my_family_height[3][height] + my_family_height[4][height]
+print("Общий рост моей семьи -", total_height, "см.")
