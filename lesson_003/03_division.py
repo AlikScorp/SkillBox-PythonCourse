@@ -10,4 +10,10 @@
 
 a, b = 179, 37
 
-# TODO здесь ваш код
+string = 'Целочисленное деление ' + str(a) + ' на ' + str(b)
+i = 0
+while a >= b:
+    a -= b
+    i += 1
+
+print(string, 'дает', i)
