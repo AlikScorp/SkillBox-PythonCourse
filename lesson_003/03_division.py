@@ -17,3 +17,5 @@ while a >= b:
     i += 1
 
 print(string, 'дает', i)
+
+# зачет!
