@@ -37,3 +37,5 @@ while i <= school_year:
     i += 1
 
 print('Студенту надо попросить', round(parents_grant, 2), 'рублей')
+
+# зачет!

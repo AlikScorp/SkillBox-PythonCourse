@@ -28,3 +28,6 @@ for color in rainbow_colors:
     i += width
 
 sd.pause()
+
+# Убирайте TODO, после выполнения задания
+# зачет!

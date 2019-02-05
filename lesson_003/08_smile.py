@@ -36,3 +36,5 @@ for i in range(0, 10):
     draw_smile(50, sd.random_point())
 
 sd.pause()
+
+# зачет!

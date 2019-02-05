@@ -53,6 +53,7 @@ for good in goods:
         item_quantity += item['quantity']
         item_cost += item['quantity']*item['price']
     print(good, '-', item_quantity, 'шт, стоимость', item_cost, 'руб')
+# TODO Обращайте внимание на предупреждения среды разработки.
 
 
 
