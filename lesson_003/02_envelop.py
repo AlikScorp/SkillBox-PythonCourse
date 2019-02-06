@@ -22,7 +22,6 @@ paper_x, paper_y = 6, 8
 # paper_x, paper_y = 9, 11
 # (просто раскоментировать нужную строку и проверить свой код)
 
-# TODO здесь ваш код
 
 if paper_x <= envelop_x:
     if paper_y <= envelop_y:
@@ -73,7 +72,6 @@ hole_x, hole_y = 8, 9
 brick_x, brick_y, brick_z = 3, 11, 6
 # (просто раскоментировать нужную строку и проверить свой код)
 
-# TODO здесь ваш код
 
 print('Размер отверстия -', hole_x, 'X', hole_y)
 print('Размер кирпича - ', brick_x, 'X', brick_y, 'X', brick_z)
@@ -102,4 +100,5 @@ elif brick_z <= hole_x:
         print('Не помещается!')
 else:
     print('Не помещается!')
-
+# Убирайте T_O_D_O после выполнения задания
+# зачет!

@@ -15,6 +15,7 @@ for i in [15, 20, 25]:
 
 # Написать функцию рисования пузырька, принммающую 2 (или более) параметра: точка рисовании и шаг
 def draw_bubble(center, radius, step, color=sd.COLOR_YELLOW):
+    # Если делаете docstring, описываете значения параметров.
     """
         The function is drawing the bubble with following parameters
     :param center:
@@ -57,3 +58,5 @@ while i < 100:
     i += 1
 
 sd.pause()
+
+# зачет!

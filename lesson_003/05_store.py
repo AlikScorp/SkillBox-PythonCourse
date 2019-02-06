@@ -49,10 +49,12 @@ store = {
 for good in goods:
     item_quantity = 0
     item_cost = 0
-    for item in store[goods[good]]:
+    item = store[goods[good]]
+    for item in item:
         item_quantity += item['quantity']
         item_cost += item['quantity']*item['price']
     print(good, '-', item_quantity, 'шт, стоимость', item_cost, 'руб')
+# TODO Обращайте внимание на предупреждения среды разработки.
 
 
 
