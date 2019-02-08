@@ -18,3 +18,9 @@ if str(month) in months:
     print('Количество дней в этом месяце равно', months[str(month)])
 else:
     print('Месяца с номером', month, 'не существует')
+
+# Можно проверять с помощью оператора in:
+# if user_input in [1,3,5,...]
+
+# зачет!
+
