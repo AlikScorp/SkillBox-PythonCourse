@@ -51,6 +51,8 @@ def draw_branches_1(start_point, angle, length):
     deviation = 30
     if length < 10:
         return
+    # TODO Будет гораздо лучше, если вы будете вычислять
+    #  значения углов и длины сторон до передачу их в функцию.
     branch1 = sd.get_vector(start_point=start_point, angle=angle+(deviation+deviation*(sd.random_number(-40, 40)/100)),
                             length=length*(0.75+0.75*(sd.random_number(-20, 20)/100)), width=2)
     branch1.draw()
@@ -72,3 +74,6 @@ draw_branches_1(start_point=root_point, angle=90, length=100)
 sd.pause()
 
 
+# TODO Обращайте внимание на предупреждения среды разработки о нарушении стандарта PEP 8.
+#  Обрабтите внимание на зеленую галочку справа над полосой прокрутки. Если ее нет, значит в файле есть ошибки
+#  или недостатки оформления.

@@ -19,7 +19,10 @@ snowflakes = []
 # sd.user_want_exit()
 
 
+# TODO Не очень хорошо когда функция кроме основной задачи делает что-то неявное.
+#  Добавлять в snowflakes center и size можно и сне этой функции.
 def add_snowflake():
+    # TODO Использование global не всегда хорошо. Здесь можно обойтись без этого.
     global snowflakes
 
     x = sd.random_number(0, sd.resolution[0])
