@@ -2,7 +2,7 @@
 
 import simple_draw as sd
 
-sd.resolution = (600, 600)
+sd.resolution = (800, 600)
 # На основе кода из практической части реализовать снегопад:
 # - создать списки данных для отрисовки N снежинок
 # - нарисовать падение этих N снежинок
@@ -19,36 +19,36 @@ snowflakes = []
 # sd.user_want_exit()
 
 
-# TODO Не очень хорошо когда функция кроме основной задачи делает что-то неявное.
-#  Добавлять в snowflakes center и size можно и сне этой функции.
 def add_snowflake():
-    # TODO Использование global не всегда хорошо. Здесь можно обойтись без этого.
-    global snowflakes
-
     x = sd.random_number(0, sd.resolution[0])
     y = sd.random_number(sd.resolution[1], sd.resolution[1]*2)
+
+# В следующей строчке можно факторы прописать константными если не нравятся рандомные снежинки :-)
+    factor_a, factor_b, factor_c = sd.random_number(1, 10)/10, sd.random_number(1, 10)/10, sd.random_number(1, 179)
+
     center = sd.get_point(x, y)
     size = sd.random_number(10, 30)
-    snowflakes.append([center, size])
-    return center, size
+    return center, size, factor_a, factor_b, factor_c
 
 
 for i in range(N):
-    sd.snowflake(*add_snowflake())
+    snowflakes.append(add_snowflake())
 
 while True:
     sd.start_drawing()
     for i in range(N):
         if snowflakes[i][0].y < 0:
             snowflakes.pop(i)
-            sd.snowflake(*add_snowflake())
+            snowflakes.append(add_snowflake())
             continue
         else:
-            sd.snowflake(snowflakes[i][0], snowflakes[i][1], color=sd.background_color)
+            sd.snowflake(snowflakes[i][0], snowflakes[i][1], color=sd.background_color,
+                         factor_a=snowflakes[i][2], factor_b=snowflakes[i][3], factor_c=snowflakes[i][4])
 
         snowflakes[i][0].x += sd.random_number(-1, 1)*5
         snowflakes[i][0].y -= sd.random_number(5, 10)
-        sd.snowflake(snowflakes[i][0], snowflakes[i][1])
+        sd.snowflake(snowflakes[i][0], snowflakes[i][1], color=sd.COLOR_WHITE,
+                     factor_a=snowflakes[i][2], factor_b=snowflakes[i][3], factor_c=snowflakes[i][4])
     sd.finish_drawing()
     sd.sleep(0.1)
     if sd.user_want_exit():
