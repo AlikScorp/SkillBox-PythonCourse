@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import simple_draw as sd
-from math import sin, cos, pi
 
 # Написать функции рисования равносторонних геометрических фигур:
 # - треугольника
@@ -24,49 +23,103 @@ from math import sin, cos, pi
 # Результат решения см lesson_004/results/exercise_01_shapes.jpg
 
 
-def polygon(start_point, angle, length, color=sd.COLOR_DARK_GREEN, width=2):
-    # TODO Здесь лучше бы подошла передача количества сторон в качестве параметра
-    #  и вычисление угла внутри функции. Сейчас вы делаете два вычисления.
-    #  Из количества сторон считаете угол, а потом из угла количество сторон.
-    n = int(360/angle)
-    x, y = start_point.x, start_point.y
-
-    for i in range(n-1):
-        vector = sd.get_vector(start_point=start_point, angle=angle+i*angle, length=length, width=width)
-        vector.draw(color=color)
-        start_point = vector.end_point
-
-    sd.line(sd.get_point(x, y), start_point, color=color, width=width)
-
-
-def draw_polygon(center, angles=3, size=100):
-    # TODO Это не требование, но подумайте как можно нарисовать таким способом многоугольник
-    #  передавая в качестве size не радиус окружности а именно длину его стороны.
+def polygon(sp, angle, side_length, angle_qty):
     """
-        Более математическая версия. Рисует многоугольник с центром в точке center, с количеством углов angles
-        и размером (радиус описанной вокруг многоугольника окружности) size.
+        Фунцкция чертит правильный многоугольник
     """
+    start, width = sp, 3
+    for side in range(angle_qty - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle + side * (360 / angle_qty), length=side_length, width=width)
+        vector.draw()
+        sp = vector.end_point
 
-    # TODO Лучше (проще, быстрее) использовать a = [] вместо a = list()
-    points = list()
-    x, y = center.x, center.y
+    sd.line(sp, start, width=width)
 
-    for i in range(angles):
-        x1 = x + size*cos(90+(2*pi*i)/angles)
-        y1 = y + size*sin(90+(2*pi*i)/angles)
-        points.append(sd.get_point(x1, y1))
 
-    sd.polygon(points, width=2)
+def triangle(sp, angle, side_length):
+    """
+        Фунцкция чертит треугольник
+    """
+    n, start, width = 3, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw()
+        sp = vector.end_point
+
+    sd.line(sp, start, width=width)
+
+
+def square(sp, angle, side_length):
+    """
+        Фунцкция чертит квадрат
+    """
+    n, start, width = 4, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw()
+        sp = vector.end_point
+
+    sd.line(sp, start, width=width)
+
+
+def pentagon(sp, angle, side_length):
+    """
+        Фунцкция чертит пятиуголник
+    """
+    n, start, width = 5, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw()
+        sp = vector.end_point
+
+    sd.line(sp, start, width=width)
+
+
+def hexagon(sp, angle, side_length):
+    """
+        Фунцкция чертит шестиугольник
+    """
+    n, start, width = 6, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw()
+        sp = vector.end_point
+
+    sd.line(sp, start, width=width)
 
 
 length = 100
+start_angle = 45
 
-for i in [3, 4, 5, 6]:
-    point = sd.get_point((i-2)*100, (i-2)*100)
-    polygon(point, angle=360/i, length=length)
-    draw_polygon(point, i, length)
+x = sd.resolution[0]/4
+y = sd.resolution[1]/4-length/2
+start_point = sd.get_point(x, y)
+
+triangle(start_point, start_angle, length)
+
+x = 3*sd.resolution[0]/4
+y = sd.resolution[1]/4-length/2
+start_point = sd.get_point(x, y)
+
+square(start_point, start_angle, length)
+
+x = 3*sd.resolution[0]/4
+y = 3*sd.resolution[1]/4-length
+start_point = sd.get_point(x, y)
+
+hexagon(start_point, start_angle, length)
+
+x = sd.resolution[0]/4
+y = 3*sd.resolution[1]/4-length
+start_point = sd.get_point(x, y)
+
+pentagon(start_point, start_angle, length)
+
+
+x = sd.resolution[0]/2+length/2
+y = sd.resolution[1]/2-length
+start_point = sd.get_point(x, y)
+
+polygon(start_point, start_angle, length, 8)
 
 sd.pause()
-
-# TODO Получилось хорошо, но не совсем в соответствии с заданием.
-#  Нужно было  написать функции рисования равносторонних геометрических фигур
