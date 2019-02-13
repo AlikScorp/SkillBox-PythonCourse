@@ -74,3 +74,5 @@ draw_branches_1(start_point=root_point, angle=90, length=100)
 
 
 sd.pause()
+
+# зачет!
