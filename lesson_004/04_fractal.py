@@ -49,20 +49,22 @@ def draw_branches(start_point, angle, length):
 
 def draw_branches_1(start_point, angle, length):
     deviation = 30
-    if length < 10:
+    if length < 5:
         return
-    # TODO Будет гораздо лучше, если вы будете вычислять
-    #  значения углов и длины сторон до передачу их в функцию.
-    branch1 = sd.get_vector(start_point=start_point, angle=angle+(deviation+deviation*(sd.random_number(-40, 40)/100)),
-                            length=length*(0.75+0.75*(sd.random_number(-20, 20)/100)), width=2)
+
+    new_angle = angle+(deviation+deviation*(sd.random_number(-40, 40)/100))
+    new_length = length*(0.75+0.75*(sd.random_number(-20, 20)/100))
+    branch1 = sd.get_vector(start_point=start_point, angle=new_angle, length=new_length, width=2)
     branch1.draw()
-    draw_branches(branch1.end_point, angle=angle+(deviation+deviation*(sd.random_number(-40, 40)/100)),
-                  length=length*(0.75+0.75*(sd.random_number(-20, 20)/100)))
-    branch2 = sd.get_vector(start_point=start_point, angle=angle-(deviation+deviation*(sd.random_number(-40, 40)/100)),
-                            length=length*(0.75+0.75*(sd.random_number(-20, 20)/100)), width=2)
+
+    draw_branches_1(branch1.end_point, angle=new_angle, length=new_length)
+
+    new_angle = angle-(deviation+deviation*(sd.random_number(-40, 40)/100))
+    new_length = length*(0.75+0.75*(sd.random_number(-20, 20)/100))
+    branch2 = sd.get_vector(start_point=start_point, angle=new_angle, length=new_length, width=2)
     branch2.draw()
-    draw_branches(branch2.end_point, angle=angle-(deviation+deviation*(sd.random_number(-40, 40)/100)),
-                  length=length*(0.75+0.75*(sd.random_number(-20, 20)/100)))
+
+    draw_branches_1(branch2.end_point, angle=new_angle, length=new_length)
 
 
 root_point = sd.get_point(300, 30)
@@ -72,8 +74,3 @@ draw_branches_1(start_point=root_point, angle=90, length=100)
 
 
 sd.pause()
-
-
-# TODO Обращайте внимание на предупреждения среды разработки о нарушении стандарта PEP 8.
-#  Обрабтите внимание на зеленую галочку справа над полосой прокрутки. Если ее нет, значит в файле есть ошибки
-#  или недостатки оформления.
