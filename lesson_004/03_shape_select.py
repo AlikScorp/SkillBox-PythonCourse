@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import simple_draw as sd
-from math import sin, cos, pi
 
 # Запросить у пользователя желаемую фигуру посредством выбора из существующих
 #   вывести список всех фигур с номерами и ждать ввода номера желаемой фигуры.
@@ -11,33 +10,56 @@ from math import sin, cos, pi
 # Результат решения см lesson_004/results/exercise_03_shape_select.jpg
 
 
-def polygon(start_point, angle, length, color=sd.COLOR_DARK_GREEN, width=2):
-    n = int(360/angle)
-    x, y = start_point.x, start_point.y
-
-    for i in range(n-1):
-        vector = sd.get_vector(start_point=start_point, angle=angle+i*angle, length=length, width=width)
-        vector.draw(color=color)
-        start_point = vector.end_point
-
-    sd.line(sd.get_point(x, y), start_point, color=color, width=width)
-
-
-def draw_polygon(center, angles=3, size=100):
+def triangle(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
     """
-        Более математическая версия. Рисует многоугольник с центром в точке center, с количеством углов angles
-        и размером (радиус описанной вокруг многоугольника окружности) size.
+        Фунцкция чертит треугольник
     """
+    n, start, width = 3, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
 
-    points = list()
-    x, y = center.x, center.y
+    sd.line(sp, start, color=shape_color, width=width)
 
-    for i in range(angles):
-        x1 = x + size*cos(90+(2*pi*i)/angles)
-        y1 = y + size*sin(90+(2*pi*i)/angles)
-        points.append(sd.get_point(x1, y1))
 
-    sd.polygon(points, width=2)
+def square(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит квадрат
+    """
+    n, start, width = 4, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
+
+    sd.line(sp, start, color=shape_color, width=width)
+
+
+def pentagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит пятиуголник
+    """
+    n, start, width = 5, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
+
+    sd.line(sp, start, color=shape_color, width=width)
+
+
+def hexagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит шестиугольник
+    """
+    n, start, width = 6, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
+
+    sd.line(sp, start, color=shape_color, width=width)
 
 
 shapes = ['треугольник', 'квадрат', 'пятиугольник', 'шестиугольник']
@@ -50,13 +72,21 @@ while int(shape) not in range(4):
     print('Вы ввели некоректный номер!')
     shape = input('Введите желаемую фигуру: ')
 
+print("Желаемая фигура:", shapes[int(shape)])
 
-center = sd.get_point(sd.resolution[0]/2, sd.resolution[1]/2)
-draw_polygon(center=center, angles=int(shape)+3, size=150)
+shape_number = int(shape)
+start_angle = 45
+length = 150
+x, y = sd.resolution[0]/2, sd.resolution[1]/2-length/2
+start_point = sd.get_point(x, y)
 
-center = sd.get_point(350, 250)
-polygon(center, 360/(int(shape)+3), 100)
+if shape_number == 0:
+    triangle(start_point, start_angle, length)
+elif shape_number == 1:
+    square(start_point, start_angle, length)
+elif shape_number == 2:
+    pentagon(start_point, start_angle, length)
+else:
+    hexagon(start_point, start_angle, length)
 
 sd.pause()
-
-# TODO Нужно использовать функции рисования фигур которые вы должны были сделать в  первом задании.
