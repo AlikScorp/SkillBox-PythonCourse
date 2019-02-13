@@ -15,42 +15,85 @@ import simple_draw as sd
 # Результат решения см lesson_004/results/exercise_02_global_color.jpg
 
 
-def polygon(start_point, angle, length, color=sd.COLOR_DARK_GREEN, width=2):
-    n = int(360/angle)
-    x, y = start_point.x, start_point.y
+def triangle(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит треугольник
+    """
+    n, start, width = 3, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
 
-    for i in range(n-1):
-        vector = sd.get_vector(start_point=start_point, angle=angle+i*angle, length=length, width=width)
-        vector.draw(color=color)
-        start_point = vector.end_point
-
-    sd.line(sd.get_point(x, y), start_point, color=color, width=width)
+    sd.line(sp, start, color=shape_color, width=width)
 
 
-colors = [['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple'], [sd.COLOR_RED, sd.COLOR_ORANGE,
-          sd.COLOR_YELLOW, sd.COLOR_GREEN, sd.COLOR_CYAN, sd.COLOR_BLUE, sd.COLOR_PURPLE]]
+def square(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит квадрат
+    """
+    n, start, width = 4, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
 
-points = [[200, 100], [500, 100], [200, 400], [500, 400]]
+    sd.line(sp, start, color=shape_color, width=width)
+
+
+def pentagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит пятиуголник
+    """
+    n, start, width = 5, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
+
+    sd.line(sp, start, color=shape_color, width=width)
+
+
+def hexagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит шестиугольник
+    """
+    n, start, width = 6, sp, 3
+    for side in range(n - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+        vector.draw(color=shape_color)
+        sp = vector.end_point
+
+    sd.line(sp, start, color=shape_color, width=width)
+
+
+colors = {'0': ['red', sd.COLOR_RED], '1': ['orange', sd.COLOR_ORANGE],
+          '2': ['yellow', sd.COLOR_YELLOW], '3': ['green', sd.COLOR_GREEN],
+          '4': ['cyan', sd.COLOR_CYAN], '5': ['blue', sd.COLOR_BLUE], '6': ['purple', sd.COLOR_PURPLE]}
 
 print("Возможные цвета:")
-for num, color in enumerate(colors[0]):
-    print(num, ':', color)
+for key, color in colors.items():
+    print(key, ':', color[0])
 
-clr = int(input("Введите желаемый цвет > "))
-while clr not in range(7):
+color = input("Введите желаемый цвет > ")
+while int(color) not in range(7):
     print("Вы ввели некоректный номер!")
-    clr = int(input("Введите желаемый цвет > "))
+    color = input("Введите желаемый цвет > ")
 
-clr = colors[1][clr]
+print('Color is:', colors[color][0])
+
 size = 100
+start_angle = 45
+shapes_color = colors[color][1]
 
-for i in [3, 4, 5, 6]:
-    point = sd.get_point(points[i-3][0], points[i-3][1])
-    polygon(point, angle=360/i, color=clr, length=size)
+triangle_start_point = sd.get_point(200, 100)
+square_start_point = sd.get_point(500, 100)
+pentagon_start_point = sd.get_point(200, 400)
+hexagon_start_point = sd.get_point(500, 400)
 
+triangle(triangle_start_point, start_angle, size, shape_color=shapes_color)
+square(square_start_point, start_angle, size, shape_color=shapes_color)
+pentagon(pentagon_start_point, start_angle, size, shape_color=shapes_color)
+hexagon(hexagon_start_point, start_angle, size, shape_color=shapes_color)
 
 sd.pause()
-
-# TODO Сложновато получилось. Сначалы вы делаете список colors, после этого
-#  enumerate(colors[0]). Можно завести словарь, и сохранять название и значение
-#  цвета в нем.
