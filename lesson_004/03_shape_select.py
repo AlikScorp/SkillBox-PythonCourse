@@ -68,6 +68,7 @@ for i, shape in enumerate(shapes):
     print('\t', i, ':', shape)
 
 shape = input('Введите желаемую фигуру: ')
+# TODO Про цикл ввода см. задание 2.
 while int(shape) not in range(4):
     print('Вы ввели некоректный номер!')
     shape = input('Введите желаемую фигуру: ')
@@ -79,7 +80,11 @@ start_angle = 45
 length = 150
 x, y = sd.resolution[0]/2, sd.resolution[1]/2-length/2
 start_point = sd.get_point(x, y)
-
+# TODO Можно создать словарь и список с названием фигур и ссылками на функции:
+#  Например:
+# functs = [pentagon, hexagon, triangle]
+# draw_function = functs[0]
+# draw_function(start_point, start_angle, length)
 if shape_number == 0:
     triangle(start_point, start_angle, length)
 elif shape_number == 1:
@@ -90,3 +95,5 @@ else:
     hexagon(start_point, start_angle, length)
 
 sd.pause()
+
+# TODO Нужно обновить функции рисования фигур после исправления первого задания.

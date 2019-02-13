@@ -79,6 +79,11 @@ color = input("Введите желаемый цвет > ")
 while int(color) not in range(7):
     print("Вы ввели некоректный номер!")
     color = input("Введите желаемый цвет > ")
+# TODO Можно сделать цикл ввода значения кода так:
+#  while True:
+#      if 0 < color < 7:
+#          color = int(input())
+#          break
 
 print('Color is:', colors[color][0])
 
@@ -97,3 +102,4 @@ pentagon(pentagon_start_point, start_angle, size, shape_color=shapes_color)
 hexagon(hexagon_start_point, start_angle, size, shape_color=shapes_color)
 
 sd.pause()
+# TODO Нужно обновить функции рисования фигур после исправления первого задания.

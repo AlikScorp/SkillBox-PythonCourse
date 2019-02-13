@@ -23,7 +23,7 @@ def add_snowflake():
     x = sd.random_number(0, sd.resolution[0])
     y = sd.random_number(sd.resolution[1], sd.resolution[1]*2)
 
-# В следующей строчке можно факторы прописать константными если не нравятся рандомные снежинки :-)
+    # В следующей строчке можно факторы прописать константными если не нравятся рандомные снежинки :-)
     factor_a, factor_b, factor_c = sd.random_number(1, 10)/10, sd.random_number(1, 10)/10, sd.random_number(1, 179)
 
     center = sd.get_point(x, y)
@@ -42,6 +42,8 @@ while True:
             snowflakes.append(add_snowflake())
             continue
         else:
+            # Можно скрыть сложность рисования фигуры, сделав функцию, которая принимает номер
+            #  снежинки в массиве, берет все необходимые значения из snowflakes и рисует снежинку.
             sd.snowflake(snowflakes[i][0], snowflakes[i][1], color=sd.background_color,
                          factor_a=snowflakes[i][2], factor_b=snowflakes[i][3], factor_c=snowflakes[i][4])
 
@@ -70,3 +72,5 @@ sd.pause()
 # - сделать сугоб внизу экрана - если снежинка долетает до низа, оставлять её там,
 #   и добавлять новую снежинку
 # Результат решения см https://youtu.be/XBx0JtxHiLg
+
+# зачет!
