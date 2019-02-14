@@ -67,11 +67,11 @@ for key, color in colors.items():
 color = input("Введите желаемый цвет > ")
 
 while True:
-    if 0 < int(color) < 7:
+    if 0 <= int(color) <= 6:
         break
     else:
         print("Вы ввели некоректный номер!")
-        color = int(input("Введите желаемый цвет > "))
+        color = input("Введите желаемый цвет > ")
 
 print('Color is:', colors[color][0])
 
