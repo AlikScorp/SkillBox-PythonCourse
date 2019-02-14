@@ -15,56 +15,45 @@ import simple_draw as sd
 # Результат решения см lesson_004/results/exercise_02_global_color.jpg
 
 
-def triangle(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+def polygon(sp, angle, side_length, angle_qty, shape_color=sd.COLOR_YELLOW):
     """
-        Фунцкция чертит треугольник
+        Фунцкция чертит правильный многоугольник
     """
-    n, start, width = 3, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
+    start, width = sp, 3
+    for side in range(angle_qty - 1):
+        vector = sd.get_vector(start_point=sp, angle=angle + side * (360 / angle_qty), length=side_length, width=width)
         vector.draw(color=shape_color)
         sp = vector.end_point
 
     sd.line(sp, start, color=shape_color, width=width)
+
+
+def triangle(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
+    """
+        Фунцкция чертит треугольник. Вызывает функцию polygon и передает ей количество углов равное 3
+    """
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=3, shape_color=shape_color)
 
 
 def square(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
     """
-        Фунцкция чертит квадрат
+        Фунцкция чертит квадрат. Вызывает функцию polygon и передает ей количество углов равное 4
     """
-    n, start, width = 4, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw(color=shape_color)
-        sp = vector.end_point
-
-    sd.line(sp, start, color=shape_color, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=4, shape_color=shape_color)
 
 
 def pentagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
     """
-        Фунцкция чертит пятиуголник
+        Фунцкция чертит пятиуголник. Вызывает функцию polygon и передает ей количество углов равное 5
     """
-    n, start, width = 5, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw(color=shape_color)
-        sp = vector.end_point
-
-    sd.line(sp, start, color=shape_color, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=5, shape_color=shape_color)
 
 
 def hexagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
     """
-        Фунцкция чертит шестиугольник
+        Фунцкция чертит шестиугольник. Вызывает функцию polygon и передает ей количество углов равное 6
     """
-    n, start, width = 6, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw(color=shape_color)
-        sp = vector.end_point
-
-    sd.line(sp, start, color=shape_color, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=6, shape_color=shape_color)
 
 
 colors = {'0': ['red', sd.COLOR_RED], '1': ['orange', sd.COLOR_ORANGE],
@@ -76,14 +65,13 @@ for key, color in colors.items():
     print(key, ':', color[0])
 
 color = input("Введите желаемый цвет > ")
-while int(color) not in range(7):
-    print("Вы ввели некоректный номер!")
-    color = input("Введите желаемый цвет > ")
-# TODO Можно сделать цикл ввода значения кода так:
-#  while True:
-#      if 0 < color < 7:
-#          color = int(input())
-#          break
+
+while True:
+    if 0 < int(color) < 7:
+        break
+    else:
+        print("Вы ввели некоректный номер!")
+        color = int(input("Введите желаемый цвет > "))
 
 print('Color is:', colors[color][0])
 
@@ -102,4 +90,3 @@ pentagon(pentagon_start_point, start_angle, size, shape_color=shapes_color)
 hexagon(hexagon_start_point, start_angle, size, shape_color=shapes_color)
 
 sd.pause()
-# TODO Нужно обновить функции рисования фигур после исправления первого задания.
