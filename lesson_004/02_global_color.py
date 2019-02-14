@@ -90,3 +90,5 @@ pentagon(pentagon_start_point, start_angle, size, shape_color=shapes_color)
 hexagon(hexagon_start_point, start_angle, size, shape_color=shapes_color)
 
 sd.pause()
+
+# зачет!

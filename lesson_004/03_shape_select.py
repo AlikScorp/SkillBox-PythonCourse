@@ -51,8 +51,11 @@ def hexagon(sp, angle, side_length, shape_color=sd.COLOR_YELLOW):
     polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=6, shape_color=shape_color)
 
 
-shapes = {'0': ['треугольник', triangle], '1': ['квадрат', square],
-          '2': ['пятиугольник', pentagon], '3': ['шестиугольник', hexagon]}
+# Я бы отформатировал этот словарь так.
+shapes = {'0': ['треугольник', triangle],
+          '1': ['квадрат', square],
+          '2': ['пятиугольник', pentagon],
+          '3': ['шестиугольник', hexagon]}
 
 print('Возможные фигуры:')
 for key, shape in shapes.items():
@@ -76,3 +79,5 @@ draw_shape = shapes[shape][1]
 draw_shape(start_point, start_angle, length)
 
 sd.pause()
+
+# зачет!
