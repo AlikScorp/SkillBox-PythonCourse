@@ -38,54 +38,30 @@ def polygon(sp, angle, side_length, angle_qty):
 
 def triangle(sp, angle, side_length):
     """
-        Фунцкция чертит треугольник
+        Фунцкция чертит треугольник посредством вызова универсальной функции polygon
     """
-    n, start, width = 3, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw()
-        sp = vector.end_point
-
-    sd.line(sp, start, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=3)
 
 
 def square(sp, angle, side_length):
     """
-        Фунцкция чертит квадрат
+        Фунцкция чертит квадрат. Вызывает функцию polygon и передает ей количество углов равное 4
     """
-    n, start, width = 4, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw()
-        sp = vector.end_point
-
-    sd.line(sp, start, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=4)
 
 
 def pentagon(sp, angle, side_length):
     """
-        Фунцкция чертит пятиуголник
+        Фунцкция чертит пятиуголник. Вызывает функцию polygon и передает ей количество углов равное 5
     """
-    n, start, width = 5, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw()
-        sp = vector.end_point
-
-    sd.line(sp, start, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=5)
 
 
 def hexagon(sp, angle, side_length):
     """
-        Фунцкция чертит шестиугольник
+        Фунцкция чертит шестиугольник. Вызывает функцию polygon и передает ей количество углов равное 6
     """
-    n, start, width = 6, sp, 3
-    for side in range(n - 1):
-        vector = sd.get_vector(start_point=sp, angle=angle+side*(360/n), length=side_length, width=width)
-        vector.draw()
-        sp = vector.end_point
-
-    sd.line(sp, start, width=width)
+    polygon(sp=sp, angle=angle, side_length=side_length, angle_qty=6)
 
 
 length = 100
@@ -115,15 +91,6 @@ start_point = sd.get_point(x, y)
 
 pentagon(start_point, start_angle, length)
 
-
-x = sd.resolution[0]/2+length/2
-y = sd.resolution[1]/2-length
-start_point = sd.get_point(x, y)
-
-polygon(start_point, start_angle, length, 8)
-
 sd.pause()
 
 # Ура. Докстринги.
-# TODO Функции вы сделали, но в задании было написано что функции рисования отдельных фигур
-#  должны вызывать функцию рисования полигона с нужными параметрами.
