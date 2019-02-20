@@ -20,3 +20,6 @@ print('Давайте приготовим "Двойной Чизбургер":'
 my_burger.get_double_cheeseburger()
 print('\nИ мой любимый рецепт - "Чикен Гурмэ Экзотик":')
 my_burger.get_chicken_gurme_exotic()
+
+# TODO Убирайте TODO
+#  Функции рисования частей бургеров нужно вызывать в этом модуле.
