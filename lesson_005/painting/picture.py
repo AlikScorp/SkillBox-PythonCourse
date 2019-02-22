@@ -91,13 +91,11 @@ def draw_man():
 
 def draw_picture():
     sd.resolution = (1200, 800)
-    # color = sd.COLOR_DARK_GREEN
     sd.caption = 'Morning in a country'
 
     sd.start_drawing()
 
     draw_house()
-    # draw_man()
     draw_tree()
 
     draw_sun(sd.get_point(100, 700), angle=30)
@@ -138,6 +136,3 @@ if __name__ == '__main__':
     sd.resolution = (1200, 800)
     draw_picture_animated()
     sd.pause()
-
-
-

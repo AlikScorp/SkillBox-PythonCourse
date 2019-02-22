@@ -15,7 +15,7 @@ def draw_branches(start_point, angle, length):
     draw_branches(branch2.end_point, angle=angle-deviation, length=length*0.75)
 
 
-def draw_branches_1(start_point, angle, length, color=sd.COLOR_DARK_GREEN):
+def draw_branches_1(start_point, angle, length):
     deviation = 30
     if length < 5:
         return
@@ -34,14 +34,14 @@ def draw_branches_1(start_point, angle, length, color=sd.COLOR_DARK_GREEN):
     branch1 = sd.get_vector(start_point=start_point, angle=new_angle, length=new_length, width=width)
     branch1.draw(color=color)
 
-    draw_branches_1(branch1.end_point, angle=new_angle, length=new_length, color=color)
+    draw_branches_1(branch1.end_point, angle=new_angle, length=new_length)
 
     new_angle = angle-(deviation+deviation*(sd.random_number(-40, 40)/100))
     new_length = length*(0.75+0.75*(sd.random_number(-20, 20)/100))
     branch2 = sd.get_vector(start_point=start_point, angle=new_angle, length=new_length, width=width)
     branch2.draw(color=color)
 
-    draw_branches_1(branch2.end_point, angle=new_angle, length=new_length, color=color)
+    draw_branches_1(branch2.end_point, angle=new_angle, length=new_length)
 
 
 if __name__ == '__main__':
@@ -50,4 +50,3 @@ if __name__ == '__main__':
     draw_branches_1(start_point=root_point, angle=90, length=100)
     # draw_branches(start_point=root_point, angle=90, length=100)
     sd.pause()
-

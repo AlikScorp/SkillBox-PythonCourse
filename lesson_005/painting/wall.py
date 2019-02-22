@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-
 import simple_draw as sd
 
 
 def draw_wall(start_point=sd.get_point(0, 0), area=(sd.resolution[0], sd.resolution[1])):
     """
         Функция рисует стену размером width x height из стартовой точки start_point
-    :return:
     """
     color = sd.COLOR_DARK_CYAN
     max_x, max_y = area[0], area[1]
@@ -30,4 +28,3 @@ if __name__ == '__main__':
     draw_wall(sd.get_point(100, 200), area=(300, 300))
     sd.finish_drawing()
     sd.pause()
-
