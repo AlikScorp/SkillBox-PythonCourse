@@ -6,13 +6,10 @@ from lesson_005 import room_2 as r2
 # Вывести на консоль жителей комнат (модули room_1 и room_2)
 # Формат: В комнате room_1 живут: ...
 
-# TODO здесь ваш код
 print('В комнате room_1 живут:')
-# TODO Можно передавать в enumerate число с которого будет вестись отсчет.
-for i, person in enumerate(r1.folks):
-    print('\t', i + 1, ') ', person, sep='')
+for i, person in enumerate(r1.folks, start=1):
+    print('\t', i, ') ', person, sep='')
 
 print('В комнате room_2 живут:')
-for i, person in enumerate(r2.folks):
-    print('\t', i + 1, ') ', person, sep='')
-# TODO Убирайте TODO
+for i, person in enumerate(r2.folks, start=1):
+    print('\t', i, ') ', person, sep='')
