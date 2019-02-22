@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from lesson_005 import my_burger
+from lesson_005.my_burger import *
 # Создать модуль my_burger. В нем определить функции добавления инградиентов:
 #  - булочки
 #  - котлеты
@@ -15,11 +15,28 @@ from lesson_005 import my_burger
 # Создать рецепт своего бургера, по вашему вкусу.
 # Если не хватает инградиентов - создать соответствующие функции в модуле my_burger
 
-# TODO здесь ваш код
 print('Давайте приготовим "Двойной Чизбургер":')
-my_burger.get_double_cheeseburger()
-print('\nИ мой любимый рецепт - "Чикен Гурмэ Экзотик":')
-my_burger.get_chicken_gurme_exotic()
+add_bun()
+add_beef_patty()
+add_cheese()
+add_beef_patty(1)
+add_cheese(1)
+add_pickles()
+add_onion()
+add_ketchup()
+add_mustard()
+add_bun(1)
+is_ready()
+print('Но не забывайте - в нём 442Ккал!!! :-)')
 
-# TODO Убирайте TODO
-#  Функции рисования частей бургеров нужно вызывать в этом модуле.
+print('\nИ мой любимый рецепт - "Чикен Гурмэ Экзотик":')
+add_bun()
+add_mustard()
+add_chicken()
+add_tomato()
+add_salad()
+add_guacamole()
+add_bun(1)
+is_ready()
+print('Но не забывайте -  в нём 621Ккал!!! :-)')
+
