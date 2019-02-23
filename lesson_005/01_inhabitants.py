@@ -13,3 +13,5 @@ for i, person in enumerate(r1.folks, start=1):
 print('В комнате room_2 живут:')
 for i, person in enumerate(r2.folks, start=1):
     print('\t', i, ') ', person, sep='')
+
+# зачет!

@@ -24,6 +24,12 @@ people += dsh1r1_folks
 people += dsh1r2_folks
 people += dsh2r1_folks
 people += dsh2r2_folks
-
+# TODO Вместо добавления каждой комнаты по отдельности можно задать
+#  people как сумму *_folks одной операцией. Т. е. вмемто
+#  my_list = []
+#  my_list += [1, 2]
+#  my_list += [3, 4]
+#  сделать
+#  my_list = [1, 2] + [3, 4]
 inhabitants = ', '.join(people)
 print('На районе живут:', inhabitants)
