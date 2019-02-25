@@ -1,4 +1,10 @@
 # -*- coding: utf-8 -*-
+# TODO Импортировать все содержимое модуля плохая практика.
+#  Нужно либо импортировать модуль и ссылаться на него.
+#  from lesson_005 import my_burger
+#  my_burger.add_bun()
+#  Либо перечислять при импорте то, что будете использовать.
+#  from lesson_005.my_burger import (add_bun, add_cheese, ...)
 from lesson_005.my_burger import *
 # Создать модуль my_burger. В нем определить функции добавления инградиентов:
 #  - булочки
