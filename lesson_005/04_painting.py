@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# TODO Импортировать все содержимое модуля плохая практика.
-from lesson_005.painting.picture import *
+import lesson_005.painting.picture as pic
+import simple_draw as sd
 # Создать пакет, в котором собрать функции отрисовки из предыдущего урока
 #  - радуги
 #  - стены
@@ -25,19 +25,19 @@ sd.caption = 'Morning in a country'
 
 sd.start_drawing()
 
-draw_house()
-draw_tree()
+pic.draw_house()
+pic.draw_tree()
 
-draw_sun(sd.get_point(100, 700), angle=30)
-draw_cloud(300, 730)
-draw_cloud(100, 670)
-draw_cloud(500, 650)
-draw_cloud(700, 710)
+pic.draw_sun(sd.get_point(100, 700), angle=30)
+pic.draw_cloud(300, 730)
+pic.draw_cloud(100, 670)
+pic.draw_cloud(500, 650)
+pic.draw_cloud(700, 710)
 
 sd.rectangle(sd.get_point(0, 0), sd.get_point(sd.resolution[0], 100), color=(180, 130, 31))
 
-snowdrift(300)
-draw_rainbow(sd.get_point(400, -100), 10, 1000)
+pic.snowdrift(300)
+pic.draw_rainbow(sd.get_point(400, -100), 10, 1000)
 sd.finish_drawing()
 
 sd.pause()
