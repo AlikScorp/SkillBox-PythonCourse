@@ -18,3 +18,5 @@ people = (dch1r1_folks + dch1r2_folks + dch2r1_folks + dch2r2_folks +
           dsh1r1_folks + dsh1r2_folks + dsh2r1_folks + dsh2r2_folks)
 inhabitants = ', '.join(people)
 print('На районе живут:', inhabitants)
+
+# зачет!
