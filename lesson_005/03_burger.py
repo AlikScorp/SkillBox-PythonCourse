@@ -38,3 +38,5 @@ mb.add_guacamole()
 mb.add_bun(1)
 mb.is_ready()
 print('Но не забывайте -  в нём 621Ккал!!! :-)')
+
+# зачет!
