@@ -3,6 +3,11 @@ from lesson_005.painting.wall import draw_wall
 import simple_draw as sd
 from lesson_005.painting.fractal import draw_branches_1
 from lesson_005.painting.rainbow import draw_rainbow
+# Не буду делать туду, но вы все-таки обратите внимание.
+# Не нужно смешивать импорты в одну кучу.
+# В первую очередь помещаются импорты из стандартной библиотеки python.
+# После дополнительные модули, установленные как зависимости.
+# И уже после них импортируем тот код, который написали вы.
 
 
 def draw_house():
