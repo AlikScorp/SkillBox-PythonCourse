@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from lesson_006.mastermind_engine import generate_number, check_number
+from termcolor import colored, cprint
+
+capacity = 4
+
 # Игра «Быки и коровы»
 # https://goo.gl/Go2mb9
 #
@@ -43,4 +48,25 @@
 # Это пример применения SOLID принципа (см https://goo.gl/GFMoaI) в архитектуре программ.
 # Точнее, в этом случае важен принцип единственной ответственности - https://goo.gl/rYb3hT
 
-# TODO здесь ваш код...
+generate_number(capacity)
+round_number = 1
+message = 'Сыграем в "Быка и Корову"? Я загадал число!\n' \
+          'Число из {} цифр! Цифры в числе не повторяются и число не начинаться с нуля'.format(capacity)
+cprint(message, color='blue')
+while True:
+    cprint('Раунд {}'.format(round_number), color='red')
+    user_number = input(colored('Введите число: ', color='cyan'))
+    round_number += 1
+    result = check_number(user_number)
+    message = '> Быки - {}, Коровы - {}'.format(result['bulls'], result['cows'])
+    cprint(message, color='blue')
+    if result['bulls'] == 4:
+        message = 'Поздравляю! Вы победили! Искомое число - {}'.format(user_number)
+        cprint(message, 'red')
+        answer = input(colored('Сыграем еще? ', color='blue'))
+        if answer == 'да' or answer == 'Да':
+            generate_number(capacity)
+            round_number = 1
+            continue
+        else:
+            break
