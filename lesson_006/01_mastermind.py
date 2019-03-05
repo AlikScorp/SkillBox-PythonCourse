@@ -2,7 +2,8 @@
 
 from lesson_006.mastermind_engine import generate_number, check_number
 from termcolor import colored, cprint
-
+# TODO Неплохое решение, сделать код универсальным для
+#  чисел разной длины.
 capacity = 4
 
 # Игра «Быки и коровы»
@@ -64,9 +65,16 @@ while True:
         message = 'Поздравляю! Вы победили! Искомое число - {}'.format(user_number)
         cprint(message, 'red')
         answer = input(colored('Сыграем еще? ', color='blue'))
+        # TODO Здесь можно проверять if answer in ['Да', 'да']
         if answer == 'да' or answer == 'Да':
             generate_number(capacity)
             round_number = 1
             continue
         else:
             break
+
+# TODO Можно немного усложнить процесс решения, если запретить водить для проверки
+#  одинаковые цифры.
+#  Нужно немного структурировать код. Желательно отделить обработку ввода пользователя
+#  от его проверки.
+#  В целом для первой проверки довольно неплохо.
