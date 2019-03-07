@@ -118,7 +118,17 @@ def remove_fallen(fallen):
     :param fallen: Список упавших снединок
     :return: None
     """
+    # TODO Здесь лучше отсортировать fallen по убыванию.
+    #  Если удалять сначала снежинку с меньшим номером,
+    #  то их номера уменьшатся и при удалении снежинки с большим номером
+    #  вы можете удалить не ту.
+    #  Есть еще один вариант:
+    #  global snowflakes
+    #  snowflakes = [flake for i, flake in enumerate(snowflakes) if i not in fallen]
     if fallen:
+        # TODO Здесь лучше сделать
+        #  for i in fallen
+        #  remove_flake(i)
         for i in range(len(fallen)):
             remove_flake(fallen[i])
 
@@ -140,6 +150,7 @@ def add_flake():
     snowflakes.append(add_snowflake())
 
 
+# TODO Не нужно дублировать содержимое основного модуля здесь.
 def snowfall(n=50):
     """
     Функция рисует снегопад из n снежинок
