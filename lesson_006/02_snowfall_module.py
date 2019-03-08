@@ -18,6 +18,7 @@ quantity = 50
 
 # создать_снежинки(N)
 create_snowflakes(quantity=quantity)
+sd.caption = 'Snowfall'
 
 while True:
     #  нарисовать_снежинки_цветом(color=sd.background_color)
