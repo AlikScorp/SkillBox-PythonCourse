@@ -121,6 +121,7 @@ def remove_fallen(fallen_flakes):
     global snowflakes
     # ниженаписанная конструкция просто магия какаято (SQL запрос один-в-один)
     # Python просто шаманство какето! :-)
+    # Зато все понятно. А если добавить артикли будет нормальное предложение на английском.
     snowflakes = [flake for flake in snowflakes if flake not in fallen_flakes]
 
 
