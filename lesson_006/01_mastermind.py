@@ -5,6 +5,18 @@ from termcolor import colored, cprint
 
 capacity = 4
 
+SUCCESS = 0
+DUPLICATION_OF_DIGIT = 1
+START_FROM_ZERO = 2
+NUMBER_TOO_LONG = 3
+NUMBER_TOO_SHORT = 4
+
+error_message = ['Сравниваем с задуманным ...',
+                 'Дублирование цифр в числе. В числе не должно быть одинаковых цифр!',
+                 'Нуль в начале числа. Число не должно начинаться с нуля!',
+                 'Число слишком большое, цифр в числе должно быть {}!'.format(capacity),
+                 'Число слишком маленькое, цифр в числе должно быть {}!'.format(capacity)]
+
 # Игра «Быки и коровы»
 # https://goo.gl/Go2mb9
 #
@@ -55,9 +67,16 @@ def check_user_number(number):
     :param number: Проверяемое число
     :return: True если количество цифр равно capacity и False если нет
     """
-    if len(set(number)) == capacity:
-        return True
-    return False
+    if number[0] == '0':
+        return START_FROM_ZERO
+    elif len(number) < capacity:
+        return NUMBER_TOO_SHORT
+    elif len(set(number)) < capacity:
+        return DUPLICATION_OF_DIGIT
+    elif len(number) > capacity:
+        return NUMBER_TOO_LONG
+    else:
+        return SUCCESS
 
 
 def get_user_number():
@@ -66,9 +85,16 @@ def get_user_number():
     :return: Полученное от пользователя число
     """
     number = input(colored('Введите число: ', color='cyan'))
-    while not check_user_number(number):
+    err_number = check_user_number(number)
+
+    while err_number:
         cprint('Некоректный ввод!', color='red')
+        cprint(error_message[err_number], color='red')
+
         number = input(colored('Введите число: ', color='cyan'))
+        err_number = check_user_number(number)
+
+    cprint(error_message[err_number], color='cyan')
     return number
 
 
