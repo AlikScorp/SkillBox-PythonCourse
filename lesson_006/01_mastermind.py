@@ -125,3 +125,5 @@ while True:
     else:
         message = '> Быки - {}, Коровы - {}'.format(result['bulls'], result['cows'])
         cprint(message, color='blue')
+
+# зачет!
