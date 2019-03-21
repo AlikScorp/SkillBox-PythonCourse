@@ -234,3 +234,5 @@ print(Water(), '+', Earth(), '+', Fire(), '=', Water(), '+', Lava(), '=', Water(
 print(Clay(), '+', Fire(), '=', Clay() + Fire())
 print(Water(), '+', Sand(), '+', Fire(), '=', Clay(), '+', Fire(), '=', Water() + Sand() + Fire())
 print(Earth(), '+', Air(), '+', Air(), '=', Dust(), '+', Air(), '=', Earth() + Air() + Air())
+
+# зачет!
