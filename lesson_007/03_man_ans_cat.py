@@ -69,8 +69,7 @@ class Cat:
     def act(self):
         if not self.status:
             cprint('{} мертв!'.format(self.name), color='white', attrs=['bold'])
-            # TODO Если вам не нужен результат, то можно возвращать None, или делать пустой return
-            return False
+            return
 
         dice = randint(1, 4)
 
@@ -116,18 +115,19 @@ class Man:
             self.name, 'Имеет дом' if self.house else 'Бездомный', self.fullness), color='magenta', attrs=['bold'])
 
     def eat(self):
-        # TODO В этой функции вы проверяете достаточно ли продуктов для того чтобы поесть.
-        #  А потом еще раз проверяете хватит ли продуктов дома, в методе remove_food.
-        #  Причем если продктов недостаточно, их остаток просто теряется.
-        #  Подумайте, может быть стоит передавать этот остаток человеку, увеличивая его сытость,
-        #  пусть и не полностью.
-        if self.house.get_food() >= 10:
-            cprint('{} поел'.format(self.name), color='yellow')
+        food_quantity = self.house.get_food()
+        if food_quantity >= 10:
+            cprint('{} хорошенько поел'.format(self.name), color='yellow')
             self.fullness += 10
             self.house.remove_food(10)
             self.house.add_dirt(10)
+        elif food_quantity == 0:
+            cprint('{} остался голодным. В доме нет еды!'.format(self.name), color='red')
         else:
-            cprint('{} нет еды'.format(self.name), color='red')
+            cprint('{} слегка перекусил'.format(self.name), color='yellow')
+            self.fullness += 5
+            self.house.remove_food(food_quantity)
+            self.house.add_dirt(5)
 
     def get_the_pet(self, pet):
         if self.house:
@@ -160,7 +160,7 @@ class Man:
             cprint('{} сходил в магазин за едой'.format(self.name), color='magenta')
             self.house.remove_money(50)
             self.house.add_food(50)
-            if self.house.get_feed() <= 10:
+            if self.house.get_feed() <= 20:
                 self.buy_feed()
         else:
             cprint('{} деньги кончились!'.format(self.name), color='red')
@@ -194,14 +194,14 @@ class Man:
         dice = randint(1, 6)
         if self.fullness <= 20:
             self.eat()
-        elif self.house.get_food() <= 20:
-            self.shopping()
         elif self.house.get_money() < 50:
             self.work()
+        elif self.house.get_food() <= 20:
+            self.shopping()
+        elif self.house.get_feed() <= self.pets_count*20:  # Учитываем количество животных, чтобы никто не умер
+            self.buy_feed()
         elif self.house.get_dirt() >= 100:
             self.clean_the_house()
-        elif self.house.get_feed() <= 20:
-            self.buy_feed()
         elif dice == 1:
             self.work()
         elif dice == 2:
@@ -293,7 +293,8 @@ person.work()
 cats.append(Cat('Васька'))
 cats.append(Cat('Петька'))
 cats.append(Cat('Борька'))
-
+cats.append(Cat('Кузька'))
+cats.append(Cat('Федька'))
 
 for cat in cats:
     person.get_the_pet(cat)
@@ -318,6 +319,4 @@ for i in range(1, 366):
 # Им всем вместе так же надо прожить 365 дней.
 
 # (Можно определить критическое количество котов, которое может прокормить человек...)
-# TODO методы, в которых вы просто возвращаете значение атрибута (еды, денег, ...) в текущем виде
-#  лишние.
-# TODO Подумайте что можно изменить, чтобы все 3 кота выжиывли. А можете оставить как есть.
+# Можно увеличивать количество котов до 5-ти штук (чаще всего все выживают), но грязи в доме становится ...
