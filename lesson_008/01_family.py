@@ -63,6 +63,9 @@ class House:
 
         return result
 
+# TODO Можно оформить функции изменяющие количество продуктов как свойство (property)
+#  По ссылке можно посмотреть пример на русском
+#  https://pythonz.net/references/named/property/
     def add_food(self, quantity):
         self.food += quantity
 
@@ -122,6 +125,8 @@ class Human:
         self.fullness = 30
         self.happiness = 100
         self.house = None
+        # TODO Если статус будет использоваться только в двух вариантах жив/мертв, то лучше сделать
+        #  его логического типа  (bool: True/False)
         self.status = 1
 
     def __str__(self):
@@ -157,6 +162,10 @@ class Human:
 
     def act(self):
         pass
+# TODO В классе Human нужно оставить только то, что свойственно всем наследникам.
+#  Уборку, например, нужно перенести в Wife.
+#  А метод eat лучше сделать общим в Human. Для различий в выводимом тексте можно использовать константы
+#  в классах мужа и жены.
 
 
 class Husband(Human):
@@ -357,10 +366,13 @@ if __name__ == "__main__":
         print(serge)
         print(masha)
         print(home)
-
-    cprint('За год было съедено {} еды, заработано {} денег и купленно {} шуб'.format(home.total_eaten,
-                                                                                      home.total_earned,
-                                                                                      masha.total_coats), color='grey')
+    # TODO Отформатировал ваш код. Аргументы функций лучше переносить на новую строку.
+    #  Так ваш код будет проще читать.
+    cprint('За год было съедено {} еды, заработано {} денег и купленно {} шуб'.format(
+        home.total_eaten,
+        home.total_earned,
+        masha.total_coats
+    ), color='grey')
 
 
 # TODO после реализации первой части - отдать на проверку учителю
