@@ -286,10 +286,6 @@ class Human:
 
 class Husband(Human):
 
-    # TODO Не нужно переопределять метод, раз вы не хотите его заменить или дополнить.
-    def __str__(self):
-        return super().__str__()
-
     def __init__(self, name):
         super().__init__(name=name)
         self.total_earned = 0
@@ -340,10 +336,6 @@ class Wife(Human):
         super().__init__(name=name)
         self.gender = self.GENDER_WOMAN
         self.total_coats = 0
-
-    # TODO Не нужно переопределять метод, раз вы не хотите его заменить или дополнить.
-    def __str__(self):
-        return super().__str__()
 
     def act(self):
 
@@ -429,10 +421,6 @@ if __name__ == "__main__":
         serge.total_earned,
         masha.total_coats
     ), color='grey')
-
-# TODO Можете исправить замечания и переходить ко второй части.
-
-# TODO после реализации первой части - отдать на проверку учителю
 
 # =============================================  Часть вторая
 #
