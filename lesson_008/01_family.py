@@ -148,6 +148,8 @@ class Human:
                   'homeless': ['бездомное', 'бездомный', 'бездомная'],
                   'him': ['него', 'него', 'нее'],
                   'died': ['мертво', 'мертв', 'мертва'],
+                  'can': ['смогло', 'смог', 'смогла'],
+                  'sleep': ['поспало', 'поспал', 'поспала'],
                   }
 
     def __init__(self, name):
@@ -242,6 +244,7 @@ class Human:
                 self.happiness += 5
                 self.house.dirt += 5
             else:
+                self.fullness -= 10
                 cprint('{} не {} еды!'.format(self.name, self.vocabulary['find'][self.gender]), color='yellow')
         else:
             cprint('{} {}, у {} нет еды!'.format(
@@ -293,9 +296,6 @@ class Husband(Human):
     def act(self):
         if not super().act():
             return
-
-        if self.house.dirt > 90:
-            self.happiness -= 10
 
         dice = randint(1, 3)
 
@@ -398,29 +398,29 @@ class Wife(Human):
         cprint('{} убралась в доме'.format(self.name), color='yellow')
 
 
-if __name__ == "__main__":
-    home = House()
-
-    serge = Husband(name='Сережа')
-    masha = Wife(name='Маша')
-
-    serge.go_to_the_house(home)
-    masha.go_to_the_house(home)
-
-    for day in range(365):
-        home.dirt += 10
-        cprint('================== День {} =================='.format(day + 1), color='red')
-        serge.act()
-        masha.act()
-        print(serge)
-        print(masha)
-        print(home)
-
-    cprint('За год было съедено {} еды, заработано {} денег и купленно {} шуб'.format(
-        Human.total_eaten,
-        serge.total_earned,
-        masha.total_coats
-    ), color='grey')
+# if __name__ == "__main__":
+#     home = House()
+#
+#     serge = Husband(name='Сережа')
+#     masha = Wife(name='Маша')
+#
+#     serge.go_to_the_house(home)
+#     masha.go_to_the_house(home)
+#
+#     for day in range(365):
+#         home.dirt += 10
+#         cprint('================== День {} =================='.format(day + 1), color='red')
+#         serge.act()
+#         masha.act()
+#         print(serge)
+#         print(masha)
+#         print(home)
+#
+#     cprint('За год было съедено {} еды, заработано {} денег и купленно {} шуб'.format(
+#         Human.total_eaten,
+#         serge.total_earned,
+#         masha.total_coats
+#     ), color='grey')
 
 # =============================================  Часть вторая
 #
@@ -476,24 +476,57 @@ class Cat:
 # отличия от взрослых - кушает максимум 10 единиц еды,
 # степень счастья  - не меняется, всегда ==100 ;)
 
-class Child:
+class Child(Human):
 
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return super().__str__()
+    def __init__(self, name):
+        super().__init__(name)
+        self.happiness = 100
 
     def act(self):
-        pass
+        if not super().act():
+            return
+
+        dice = randint(1, 2)
+
+        if self.fullness <= 20:
+            self.eat()
+        elif dice == 1:
+            self.sleep()
+        else:
+            self.eat()
 
     def eat(self):
-        pass
+        if self.house:
+            if self.house.food >= 10:
+                self.fullness += 10
+                self.house.food -= 10
+                cprint('{} хорошенько {}'.format(self.name, self.vocabulary['eat'][self.gender]), color='yellow')
+            elif self.house.food != 0:
+                self.fullness += self.house.food
+                del self.house.food
+                cprint('{} немного {}'.format(self.name, self.vocabulary['snack'][self.gender]), color='yellow')
+            else:
+                self.fullness -= 10
+                cprint('{} не {} поесть в доме нет еды'.format(
+                    self.name,
+                    self.vocabulary['can'][self.gender]),
+                    color="red")
+        else:
+            cprint('{} {}, у {} нет еды!'.format(
+                self.name,
+                self.vocabulary['homeless'][self.gender],
+                self.vocabulary['him'][self.gender]
+            ), color='yellow')
 
     def sleep(self):
-        pass
-
-# TODO после реализации второй части - отдать на проверку учителем две ветки
+        if self.fullness >= 10:
+            self.fullness -= 10
+            cprint('{} хорошенько {}'.format(self.name, self.vocabulary['sleep'][self.gender]), color='yellow')
+        elif self.fullness != 0:
+            del self.fullness
+            cprint('{} немного {}'.format(self.name, self.vocabulary['sleep'][self.gender]), color='yellow')
+        else:
+            cprint('{} {} во сне'.format(self.name, self.vocabulary['die'][self.gender]), color='red')
 
 
 # ============================================= Часть третья
@@ -502,24 +535,27 @@ class Child:
 # влить в мастер все коммиты из ветки develop и разрешить все конфликты
 # отправить на проверку учителем.
 
+if __name__ == "__main__":
 
-# home = House()
-# serge = Husband(name='Сережа')
-# masha = Wife(name='Маша')
-# kolya = Child(name='Коля')
-# murzik = Cat(name='Мурзик')
-#
-# for day in range(365):
-#     cprint('================== День {} =================='.format(day), color='red')
-#     serge.act()
-#     masha.act()
-#     kolya.act()
-#     murzik.act()
-#     cprint(serge, color='cyan')
-#     cprint(masha, color='cyan')
-#     cprint(kolya, color='cyan')
-#     cprint(murzik, color='cyan')
-#
+    home = House()
+    serge = Husband(name='Сережа')
+    masha = Wife(name='Маша')
+    kolya = Child(name='Коля')
+
+    serge.go_to_the_house(home)
+    masha.go_to_the_house(home)
+    kolya.go_to_the_house(home)
+
+    for day in range(1, 366):
+        cprint('================== День {} =================='.format(day), color='red')
+        serge.act()
+        masha.act()
+        kolya.act()
+        print(serge)
+        print(masha)
+        print(kolya)
+        print(home)
+
 
 # Усложненное задание (делать по желанию)
 #
