@@ -580,36 +580,7 @@ class Cat:
             cprint('{} бездомный, он не может царапать стены'.format(self.name), color='red', attrs=['bold'])
 
 
-# =============================================  Часть вторая бис
-#
-# После реализации первой части надо в ветке мастер продолжить работу над семьей - добавить ребенка
-#
-# Ребенок может:
-#   есть,
-#   спать,
-#
-# отличия от взрослых - кушает максимум 10 единиц еды,
-# степень счастья  - не меняется, всегда ==100 ;)
-# TODO В этой ветке не должно быть ребенка.
-class Child:
-
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return super().__str__()
-
-    def act(self):
-        pass
-
-    def eat(self):
-        pass
-
-    def sleep(self):
-        pass
-
 # TODO после реализации второй части - отдать на проверку учителем две ветки
-
 
 # ============================================= Часть третья
 #
@@ -622,7 +593,6 @@ if __name__ == "__main__":
     home = House()
     serge = Husband(name='Сережа')
     masha = Wife(name='Маша')
-    # kolya = Child(name='Коля')
     murzik = Cat(name='Мурзик')
 
     serge.go_to_the_house(home)
@@ -634,11 +604,9 @@ if __name__ == "__main__":
         cprint('=============================== День {} ==============================='.format(day), color='red')
         serge.act()
         masha.act()
-        # kolya.act()
         murzik.act()
         print(serge)
         print(masha)
-        # cprint(kolya, color='cyan')
         print(murzik)
         print(home)
 
