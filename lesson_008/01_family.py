@@ -535,3 +535,4 @@ if __name__ == "__main__":
 #       for salary in range(50, 401, 50):
 #           max_cats = life.experiment(salary)
 #           print(f'При зарплате {salary} максимально можно прокормить {max_cats} котов')
+# TODO Переходите к части 3
