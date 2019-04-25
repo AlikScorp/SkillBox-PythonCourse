@@ -3,7 +3,6 @@
 from termcolor import cprint, colored
 from random import randint
 
-
 # ============================================= Часть первая
 #
 # Создать модель жизни небольшой семьи.
@@ -446,30 +445,6 @@ class Wife(Human):
                 self.name, pet.get_name()), color='red', attrs=['bold'])
 
 
-# if __name__ == "__main__":
-#     home = House()
-#
-#     serge = Husband(name='Сережа')
-#     masha = Wife(name='Маша')
-#
-#     serge.go_to_the_house(home)
-#     masha.go_to_the_house(home)
-#
-#     for day in range(365):
-#         home.dirt += 10
-#         cprint('================== День {} =================='.format(day + 1), color='red')
-#         serge.act()
-#         masha.act()
-#         print(serge)
-#         print(masha)
-#         print(home)
-#
-#     cprint('За год было съедено {} еды, заработано {} денег и купленно {} шуб'.format(
-#         Human.total_eaten,
-#         serge.total_earned,
-#         masha.total_coats
-#     ), color='grey')
-
 # =============================================  Часть вторая
 #
 # После подтверждения учителем первой части надо
@@ -706,4 +681,3 @@ if __name__ == "__main__":
 #       for salary in range(50, 401, 50):
 #           max_cats = life.experiment(salary)
 #           print(f'При зарплате {salary} максимально можно прокормить {max_cats} котов')
-# TODO Переходите к части 3
