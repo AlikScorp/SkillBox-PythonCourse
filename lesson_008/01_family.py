@@ -150,6 +150,8 @@ class Human:
                   'him': ['него', 'него', 'нее'],
                   'died': ['мертво', 'мертв', 'мертва'],
                   'play': ['играло', 'играл', 'играла'],
+                  'can': ['смогло', 'смог', 'смогла'],
+                  'sleep': ['поспало', 'поспал', 'поспала'],
                   }
 
     def __init__(self, name):
@@ -579,8 +581,70 @@ class Cat:
         else:
             cprint('{} бездомный, он не может царапать стены'.format(self.name), color='red', attrs=['bold'])
 
+# =============================================  Часть вторая бис
+#
+# После реализации первой части надо в ветке мастер продолжить работу над семьей - добавить ребенка
+#
+# Ребенок может:
+#   есть,
+#   спать,
+#
+# отличия от взрослых - кушает максимум 10 единиц еды,
+# степень счастья  - не меняется, всегда ==100 ;)
 
-# TODO после реализации второй части - отдать на проверку учителем две ветки
+
+class Child(Human):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.happiness = 100
+
+    def act(self):
+        if not super().act():
+            return
+
+        dice = randint(1, 2)
+
+        if self.fullness <= 20:
+            self.eat()
+        elif dice == 1:
+            self.sleep()
+        else:
+            self.eat()
+
+    def eat(self):
+        if self.house:
+            if self.house.food >= 10:
+                self.fullness += 10
+                self.house.food -= 10
+                cprint('{} хорошенько {}'.format(self.name, self.vocabulary['eat'][self.gender]), color='yellow')
+            elif self.house.food != 0:
+                self.fullness += self.house.food
+                del self.house.food
+                cprint('{} немного {}'.format(self.name, self.vocabulary['snack'][self.gender]), color='yellow')
+            else:
+                self.fullness -= 10
+                cprint('{} не {} поесть в доме нет еды'.format(
+                    self.name,
+                    self.vocabulary['can'][self.gender]),
+                    color="red")
+        else:
+            cprint('{} {}, у {} нет еды!'.format(
+                self.name,
+                self.vocabulary['homeless'][self.gender],
+                self.vocabulary['him'][self.gender]
+            ), color='yellow')
+
+    def sleep(self):
+        if self.fullness >= 10:
+            self.fullness -= 10
+            cprint('{} хорошенько {}'.format(self.name, self.vocabulary['sleep'][self.gender]), color='yellow')
+        elif self.fullness != 0:
+            del self.fullness
+            cprint('{} немного {}'.format(self.name, self.vocabulary['sleep'][self.gender]), color='yellow')
+        else:
+            cprint('{} {} во сне'.format(self.name, self.vocabulary['die'][self.gender]), color='red')
+
 
 # ============================================= Часть третья
 #
@@ -594,9 +658,11 @@ if __name__ == "__main__":
     serge = Husband(name='Сережа')
     masha = Wife(name='Маша')
     murzik = Cat(name='Мурзик')
+    kolya = Child(name='Коля')
 
     serge.go_to_the_house(home)
     masha.go_to_the_house(home)
+    kolya.go_to_the_house(home)
     masha.get_the_pet(murzik)
 
     print(home)
@@ -604,9 +670,11 @@ if __name__ == "__main__":
         cprint('=============================== День {} ==============================='.format(day), color='red')
         serge.act()
         masha.act()
+        kolya.act()
         murzik.act()
         print(serge)
         print(masha)
+        print(kolya)
         print(murzik)
         print(home)
 
