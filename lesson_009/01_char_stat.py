@@ -24,7 +24,6 @@
 import operator
 import os.path
 import zipfile
-
 from termcolor import cprint
 
 
@@ -70,8 +69,8 @@ class ProgressBar:
         self._symbol = '*'
 
     def display(self):
-        percentage = (self.value*100)/self.max_value
-        bar = int(percentage*0.2)*self.symbol
+        percentage = (self.value * 100) / self.max_value
+        bar = int(percentage * 0.2) * self.symbol
         print(end='\r')
         print(f'{percentage:>6.2f}% [{bar:<20}]', end='')
 
@@ -85,11 +84,6 @@ class CharCounter:
 
         Метод output выводит результаты подсчета (результаты не сортированы)
     """
-
-    SORTED_BY_ALPHABET = 0
-    SORTED_BY_ALPHABET_REVERSE = 1
-    SORTED_BY_QUANTITY = 2
-    SORTED_BY_QUANTITY_REVERSE = 3
 
     def __init__(self, filename):
         self.filename = filename
@@ -187,6 +181,13 @@ class CharCounter:
         self._print_footer()
 
 
+# После выполнения первого этапа нужно сделать упорядочивание статистики
+#  - по частоте по возрастанию
+#  - по алфавиту по возрастанию
+#  - по алфавиту по убыванию
+# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828
+
+
 class CharCounterSortedAlphabet(CharCounter):
     """
         Класс переопределяет метод output из класса CharCounter
@@ -203,7 +204,7 @@ class CharCounterSortedAlphabet(CharCounter):
 
         self._print_header()
 
-        keys = list(self.symbols.keys())    # Создаем лист из ключей словаря self.symbol
+        keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
         keys.sort()  # Сортируем лист по возрастанию
         for key in keys:
@@ -228,7 +229,7 @@ class CharCounterSortedAlphabetReverse(CharCounter):
 
         self._print_header()
 
-        keys = list(self.symbols.keys())    # Создаем лист из ключей словаря self.symbol
+        keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
         keys.sort(reverse=True)  # Сортируем лист по убыванию
         for key in keys:
@@ -290,9 +291,3 @@ class CharCounterSortedQuantityReverse(CharCounter):
 if __name__ == '__main__':
     counter = CharCounterSortedQuantityReverse('voyna-i-mir.txt.zip')
     counter.output()
-
-# После выполнения первого этапа нужно сделать упорядочивание статистики
-#  - по частоте по возрастанию
-#  - по алфавиту по возрастанию
-#  - по алфавиту по убыванию
-# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828

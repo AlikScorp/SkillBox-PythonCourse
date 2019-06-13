@@ -57,6 +57,12 @@ class LogParser:
                 output_string = ' '.join([result, str(self.results[result])])+'\n'
                 file.write(output_string)
 
+# После выполнения первого этапа нужно сделать группировку событий
+#  - по часам
+#  - по месяцу
+#  - по году
+# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828
+
 
 class LogParserHours(LogParser):
 
@@ -121,9 +127,3 @@ class LogParserYears(LogParser):
 if __name__ == '__main__':
     log_parser = LogParserHours('events.txt')
     log_parser.output()
-
-# После выполнения первого этапа нужно сделать группировку событий
-#  - по часам
-#  - по месяцу
-#  - по году
-# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828
