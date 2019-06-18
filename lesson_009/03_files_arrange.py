@@ -147,6 +147,10 @@ class FileSorterFromZip(FileSorter):
                             "icons_by_year/2017/6/2/icons/actions"
                             
                             Буду счастлив если подскажете куда копать. :-)
+                            Сохранение метаданных файла не трубуется в этом задании,
+                            но вы можете попробывать после извлечения файла устанваливать ему
+                            время доступа и модификации через os.utime https://docs.python.org/3/library/os.html#os.utime
+
                         """
 
                         with open(os.path.join(path, filename), 'wb') as outfile:
@@ -169,3 +173,6 @@ class FileSorterFromZip(FileSorter):
 if __name__ == '__main__':
     sorter = FileSorterFromZip('icons.zip', 'icons_by_year')
     sorter.start()
+
+# TODO Лучше сделать родительский класс для FileSorterFromZip и FileSorter, реализующий общие методы
+#  и содержащий абстрактный метод _sort
