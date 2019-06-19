@@ -94,6 +94,8 @@ class CharCounter:
         cprint('Ищем входной файл ...', color='yellow')
         for dir_path, dir_names, file_names in os.walk(os.getcwd()):
             if self.filename in file_names:
+                # TODO Нужно использовать os.path.join для объединения частей пути.
+                #  У меня в linux ваш код вызывает ошибку.
                 self.path_to_file = dir_path + '\\' + self.filename
                 cprint(f'Файл "{self.filename}" найден в папке "{dir_path}"', color='green')
             else:
@@ -134,6 +136,8 @@ class CharCounter:
                             progress_bar.display()
                             data = zipped_file.readline()
                             self._count_in_line(data=data)
+        # TODO Строки 130-138 и 146-154 практически идентичны. Можно сделать функцию и вызывать ее два раза.
+        #  Выводить сообщение можно там же.
         else:
             with open(self.path_to_file, 'rb') as file:
                 file_size = os.path.getsize(self.path_to_file)
@@ -291,3 +295,8 @@ class CharCounterSortedQuantityReverse(CharCounter):
 if __name__ == '__main__':
     counter = CharCounterSortedQuantityReverse('voyna-i-mir.txt.zip')
     counter.output()
+
+# TODO Обратите внимание, что код для разных типов сортировки практически идентичен.
+#  Отличия только в порядке и элементе сортировки. Измените код так, чтобы
+#  не было многократного копирования одного и того же.
+# TODO Не обязательно Этого нет в задании, но было бы неплохо сделать меню для выбора одного из вариантов сортировки.
