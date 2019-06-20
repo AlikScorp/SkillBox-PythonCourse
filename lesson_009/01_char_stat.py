@@ -89,18 +89,29 @@ class CharCounter:
         self.filename = filename
         self.path_to_file = ''
         self.symbols = {}
+        self.sort = 'Не сортировано.'
 
     def _find_file(self):
         cprint('Ищем входной файл ...', color='yellow')
         for dir_path, dir_names, file_names in os.walk(os.getcwd()):
             if self.filename in file_names:
-                # TODO Нужно использовать os.path.join для объединения частей пути.
-                #  У меня в linux ваш код вызывает ошибку.
-                self.path_to_file = dir_path + '\\' + self.filename
+                self.path_to_file = os.path.join(dir_path, self.filename)
                 cprint(f'Файл "{self.filename}" найден в папке "{dir_path}"', color='green')
             else:
                 cprint(f'Файл не найден в папке "{dir_path}"', color='red')
         return True if self.path_to_file else False
+
+    @property
+    def sort(self):
+        return self._sort
+
+    @sort.setter
+    def sort(self, sort: str):
+        self._sort = sort
+
+    @sort.deleter
+    def sort(self):
+        _sort = 'Не сортировано.'
 
     def _count_in_line(self, data):
         """
@@ -116,6 +127,22 @@ class CharCounter:
             else:
                 continue
 
+    def _count_in_file(self, file, file_name, file_size):
+        cprint(f'Считаем количество символов в файле "{file_name}" ...', color='cyan')
+        data = file.readline()
+        self._count_in_line(data=data)
+        progress_bar = ProgressBar(max_value=file_size)
+        progress_bar.symbol = 'X'
+        while data:
+            progress_bar.value += len(data)
+            progress_bar.display()
+            data = file.readline()
+            self._count_in_line(data=data)
+
+    def _sorting(self):
+        for symbol in self.symbols:
+            print(f"|{symbol:^10}|{self.symbols[symbol]:>10}|")
+
     def _count(self):
 
         if not self._find_file():
@@ -123,36 +150,15 @@ class CharCounter:
 
         if zipfile.is_zipfile(self.path_to_file):
             with zipfile.ZipFile(self.path_to_file) as zip_file:
-                for file in zip_file.namelist():
-                    file_info = zip_file.getinfo(file)  # Получаем информацию о файле
-                    cprint(f'Считаем количество символов в файле "{file}" ...', color='cyan')
-                    with zip_file.open(file) as zipped_file:
-                        data = zipped_file.readline()
-                        self._count_in_line(data=data)
-                        progress_bar = ProgressBar(max_value=file_info.file_size)
-                        progress_bar.symbol = 'X'
-                        while data:
-                            progress_bar.value += len(data)
-                            progress_bar.display()
-                            data = zipped_file.readline()
-                            self._count_in_line(data=data)
-        # TODO Строки 130-138 и 146-154 практически идентичны. Можно сделать функцию и вызывать ее два раза.
-        #  Выводить сообщение можно там же.
+                for file_name in zip_file.namelist():
+                    file_info = zip_file.getinfo(file_name)  # Получаем информацию о файле
+                    with zip_file.open(file_name) as file:
+                        self._count_in_file(file, file_name, file_info.file_size)
         else:
             with open(self.path_to_file, 'rb') as file:
-                file_size = os.path.getsize(self.path_to_file)
-                path, file_name = os.path.split(self.path_to_file)
-
-                cprint(f'Считаем количество символов в файле "{file_name}" ...', color='cyan')
-                data = file.readline()
-                self._count_in_line(data=data)
-                progress_bar = ProgressBar(max_value=file_size)
-                progress_bar.symbol = 'X'
-                while data:
-                    progress_bar.value += len(data)
-                    progress_bar.display()
-                    data = file.readline()
-                    self._count_in_line(data=data)
+                file_size = os.path.getsize(self.path_to_file)  # Получаем информацию о размере файла
+                path, file_name = os.path.split(self.path_to_file)  # Получаем информацию об имени файла
+                self._count_in_file(file, file_name, file_size)
 
         cprint('\nВсе подсчитано.', color='cyan')
         return True
@@ -170,7 +176,7 @@ class CharCounter:
     def output(self):
 
         if self._count():
-            cprint('Выводим результаты подсчета:', color='yellow')
+            cprint(f'Выводим результаты подсчета (Тип сортировки - {self._sort}):', color='yellow')
         else:
             cprint('Не найден входной файл!', color='red')
             return
@@ -178,10 +184,10 @@ class CharCounter:
         # Шапка таблицы
         self._print_header()
 
-        for symbol in self.symbols:
-            print(f"|{symbol:^10}|{self.symbols[symbol]:>10}|")
+        # Содержимое таблицы
+        self._sorting()
 
-        # подвал таблицы
+        # Подвал таблицы
         self._print_footer()
 
 
@@ -198,23 +204,17 @@ class CharCounterSortedAlphabet(CharCounter):
         Метод output выводит результаты подсчета отсортированые по алфавиту (по возрастанию)
     """
 
-    def output(self):
+    def __init__(self, filename):
+        super().__init__(filename=filename)
+        self.sort = 'По алфавиту (по возрастанию).'
 
-        if self._count():
-            cprint('Выводим результаты - отсортированно по алфавиту(по возрастанию):', color='yellow')
-        else:
-            cprint('Не найден входной файл!', color='red')
-            return
-
-        self._print_header()
+    def _sorting(self):
 
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
         keys.sort()  # Сортируем лист по возрастанию
         for key in keys:
             print(f"|{key:^10}|{self.symbols[key]:>10}|")
-
-        self._print_footer()
 
 
 class CharCounterSortedAlphabetReverse(CharCounter):
@@ -223,15 +223,11 @@ class CharCounterSortedAlphabetReverse(CharCounter):
         Метод output выводит результаты подсчета отсортированые по алфавиту (по убыванию)
     """
 
-    def output(self):
+    def __init__(self, filename):
+        super().__init__(filename=filename)
+        self.sort = 'По алфавиту (по убыванию)'
 
-        if self._count():
-            cprint('Выводим результаты - отсортированно по алфавиту(по убыванию):', color='yellow')
-        else:
-            cprint('Не найден входной файл!', color='red')
-            return
-
-        self._print_header()
+    def _sorting(self):
 
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
@@ -239,24 +235,17 @@ class CharCounterSortedAlphabetReverse(CharCounter):
         for key in keys:
             print(f"|{key:^10}|{self.symbols[key]:>10}|")
 
-        self._print_footer()
-
 
 class CharCounterSortedQuantity(CharCounter):
     """
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по частоте использования (по возрастанию)
     """
+    def __init__(self, filename):
+        super().__init__(filename=filename)
+        self.sort = 'По частоте использования (по возрастанию).'
 
-    def output(self):
-
-        if self._count():
-            cprint('Выводим результаты - отсортированно по частоте использования (по возрастанию):', color='yellow')
-        else:
-            cprint('Не найден входной файл!', color='red')
-            return
-
-        self._print_header()
+    def _sorting(self):
 
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -264,24 +253,17 @@ class CharCounterSortedQuantity(CharCounter):
         for key, value in items:
             print(f"|{key:^10}|{value:>10}|")
 
-        self._print_footer()
-
 
 class CharCounterSortedQuantityReverse(CharCounter):
     """
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по частоте использования (по убыванию)
     """
+    def __init__(self, filename):
+        super().__init__(filename=filename)
+        self.sort = 'По частоте использования (по убыванию)'
 
-    def output(self):
-
-        if self._count():
-            cprint('Выводим результаты - отсортированно по частоте использования (по убыванию):', color='yellow')
-        else:
-            cprint('Не найден входной файл!', color='red')
-            return
-
-        self._print_header()
+    def _sorting(self):
 
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -289,11 +271,25 @@ class CharCounterSortedQuantityReverse(CharCounter):
         for key, value in items:
             print(f"|{key:^10}|{value:>10}|")
 
-        self._print_footer()
-
 
 if __name__ == '__main__':
-    counter = CharCounterSortedQuantityReverse('voyna-i-mir.txt.zip')
+    choice = {'1': ['Не сортированно', CharCounter],
+              '2': ['Сортировка по алфавиту - по возрастанию', CharCounterSortedAlphabet],
+              '3': ['Сортировка по алфавиту - по убыванию', CharCounterSortedAlphabetReverse],
+              '4': ['Сортировка по частоте использования - по возрастанию', CharCounterSortedQuantity],
+              '5': ['Сортировка по частоте использования - по убыванию', CharCounterSortedQuantityReverse],
+              }
+
+    cprint('Варианты сортировки:', color='yellow')
+
+    while True:
+        for key, item in choice.items():
+            cprint(f'{key}: {item[0]}', color='cyan')
+        selected = input('Выберите вариант сортировки: ')
+        if selected in choice.keys():
+            break;
+
+    counter = choice[selected][1]('voyna-i-mir.txt.zip')
     counter.output()
 
 # TODO Обратите внимание, что код для разных типов сортировки практически идентичен.
