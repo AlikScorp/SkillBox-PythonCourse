@@ -24,7 +24,7 @@
 import operator
 import os.path
 import zipfile
-from termcolor import cprint
+from termcolor import cprint, colored
 
 
 class ProgressBar:
@@ -209,12 +209,11 @@ class CharCounterSortedAlphabet(CharCounter):
         self.sort = 'По алфавиту (по возрастанию).'
 
     def _sorting(self):
-
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
         keys.sort()  # Сортируем лист по возрастанию
-        for key in keys:
-            print(f"|{key:^10}|{self.symbols[key]:>10}|")
+        for k in keys:
+            print(f"|{k:^10}|{self.symbols[k]:>10}|")
 
 
 class CharCounterSortedAlphabetReverse(CharCounter):
@@ -228,12 +227,11 @@ class CharCounterSortedAlphabetReverse(CharCounter):
         self.sort = 'По алфавиту (по убыванию)'
 
     def _sorting(self):
-
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
         keys.sort(reverse=True)  # Сортируем лист по убыванию
-        for key in keys:
-            print(f"|{key:^10}|{self.symbols[key]:>10}|")
+        for k in keys:
+            print(f"|{k:^10}|{self.symbols[k]:>10}|")
 
 
 class CharCounterSortedQuantity(CharCounter):
@@ -241,17 +239,17 @@ class CharCounterSortedQuantity(CharCounter):
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по частоте использования (по возрастанию)
     """
+
     def __init__(self, filename):
         super().__init__(filename=filename)
         self.sort = 'По частоте использования (по возрастанию).'
 
     def _sorting(self):
-
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
         items.sort(key=operator.itemgetter(1))  # Сортируем лист (по возрастанию) по второму элементу кортежа
-        for key, value in items:
-            print(f"|{key:^10}|{value:>10}|")
+        for k, value in items:
+            print(f"|{k:^10}|{value:>10}|")
 
 
 class CharCounterSortedQuantityReverse(CharCounter):
@@ -259,17 +257,17 @@ class CharCounterSortedQuantityReverse(CharCounter):
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по частоте использования (по убыванию)
     """
+
     def __init__(self, filename):
         super().__init__(filename=filename)
         self.sort = 'По частоте использования (по убыванию)'
 
     def _sorting(self):
-
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
         items.sort(key=operator.itemgetter(1), reverse=True)  # Сортируем лист (по убыванию) по второму элементу кортежа
-        for key, value in items:
-            print(f"|{key:^10}|{value:>10}|")
+        for k, value in items:
+            print(f"|{k:^10}|{value:>10}|")
 
 
 if __name__ == '__main__':
@@ -285,14 +283,9 @@ if __name__ == '__main__':
     while True:
         for key, item in choice.items():
             cprint(f'{key}: {item[0]}', color='cyan')
-        selected = input('Выберите вариант сортировки: ')
+        selected = input(colored('Выберите вариант сортировки: ', color='cyan'))
         if selected in choice.keys():
-            break;
+            break
 
     counter = choice[selected][1]('voyna-i-mir.txt.zip')
     counter.output()
-
-# TODO Обратите внимание, что код для разных типов сортировки практически идентичен.
-#  Отличия только в порядке и элементе сортировки. Измените код так, чтобы
-#  не было многократного копирования одного и того же.
-# TODO Не обязательно Этого нет в задании, но было бы неплохо сделать меню для выбора одного из вариантов сортировки.

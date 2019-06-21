@@ -20,7 +20,7 @@
 # Требования к коду: он должен быть готовым к расширению функциональности. Делать сразу на классах.
 
 import os.path
-from termcolor import cprint
+from termcolor import cprint, colored
 
 
 class LogParser:
@@ -33,6 +33,10 @@ class LogParser:
             cprint(f'Не могу найти файл по указанному пути: "{log_name}".', color='red')
             self.log = ''
 
+    @staticmethod
+    def _key_generator(date, time):
+        return '['+' '.join([date[1:], time[:5]])+']'
+
     def _count(self):
         if not self.log:
             cprint('Не определен входной файл!', color='red')
@@ -42,7 +46,7 @@ class LogParser:
             for line in file:
                 date, time, status = line.split(' ')
                 if status[:-1] == 'NOK':
-                    result = '['+' '.join([date[1:], time[:5]])+']'
+                    result = self._key_generator(date, time)
 
                     if result in self.results.keys():
                         self.results[result] += 1
@@ -66,71 +70,41 @@ class LogParser:
 
 class LogParserHours(LogParser):
 
-    def _count(self):
-
-        if not self.log:
-            cprint('Не определен входной файл!', color='red')
-            return
-
-        with open(self.log, 'r', encoding='cp1251') as file:
-            for line in file:
-                date, time, status = line.split(' ')
-                if status[:-1] == 'NOK':
-                    result = '['+' '.join([date[1:], time[:2]])+']'
-
-                    if result in self.results.keys():
-                        self.results[result] += 1
-                    else:
-                        self.results[result] = 1
+    @staticmethod
+    def _key_generator(date, time):
+        return '['+' '.join([date[1:], time[:2]])+']'
 
 
 class LogParserMonths(LogParser):
 
-    def _count(self):
-
-        if not self.log:
-            cprint('Не определен входной файл!', color='red')
-            return
-
-        with open(self.log, 'r', encoding='cp1251') as file:
-            for line in file:
-                date, time, status = line.split(' ')
-                if status[:-1] == 'NOK':
-                    result = '['+' '.join([date[1:8]])+']'
-
-                    if result in self.results.keys():
-                        self.results[result] += 1
-                    else:
-                        self.results[result] = 1
+    @staticmethod
+    def _key_generator(date, time):
+        return '['+' '.join([date[1:8]])+']'
 
 
 class LogParserYears(LogParser):
 
-    def _count(self):
-
-        if not self.log:
-            cprint('Не определен входной файл!', color='red')
-            return
-
-        with open(self.log, 'r', encoding='cp1251') as file:
-            for line in file:
-                date, time, status = line.split(' ')
-                if status[:-1] == 'NOK':
-                    result = '['+' '.join([date[1:5]])+']'
-
-                    if result in self.results.keys():
-                        self.results[result] += 1
-                    else:
-                        self.results[result] = 1
+    @staticmethod
+    def _key_generator(date, time):
+        return '['+' '.join([date[1:5]])+']'
 
 
 if __name__ == '__main__':
-    log_parser = LogParserHours('events.txt')
-    log_parser.output()
 
-# TODO Обратите внимание, что код для разных типов группировки событий практически идентичен.
-#  Отличия только в порядке и элементе сортировки. Измените код так, чтобы
-#  не было многократного копирования одного и того же.
-#  Так как вы работаете со временем можно использовать модули стандартной библиотеки python для работы с датами.
-#  Например datetime и dateutil.
-# TODO Не обязательно. Этого нет в задании, но было бы неплохо сделать меню для выбора одного из вариантов сортировки.
+    choice = {'1': ['Сгруппировать по минутам', LogParser],
+              '2': ['Сгруппировать по часам', LogParserHours],
+              '3': ['Сгруппировать по месяцам', LogParserMonths],
+              '4': ['Сгруппировать по годам', LogParserYears],
+              }
+
+    cprint('Варианты группирования:', color='yellow')
+
+    while True:
+        for key, item in choice.items():
+            cprint(f'{key}: {item[0]}', color='cyan')
+        selected = input(colored('Выберите вариант групирования: ', color='cyan'))
+        if selected in choice.keys():
+            break
+
+    log_parser = choice[selected][1]('events.txt')
+    log_parser.output()
