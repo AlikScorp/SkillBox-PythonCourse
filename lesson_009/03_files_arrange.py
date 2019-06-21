@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 import os
 import time
 import shutil
@@ -42,8 +42,8 @@ from termcolor import cprint
 
 class FileSorter:
     """
-        Класс "раскидывает" по папкам файлы из переданного ему источника.
-        Источником является папка с файлами.
+        Абстрактный класс для сортировки файлов из переданного ему источника.
+        Источник определяется в методе _sort.
 
         Папки назначения создаются на основании даты создания файлов в источнике.
     """
@@ -62,6 +62,26 @@ class FileSorter:
             os.makedirs(self.destination)
 
     def _sort(self):
+        pass
+
+    def start(self):
+        self._sort()
+
+# Усложненное задание (делать по желанию)
+# Нужно обрабатывать zip-файл, содержащий фотографии, без предварительного извлечения файлов в папку.
+# Основная функция должна брать параметром имя zip-файла и имя целевой папки.
+# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828
+
+
+class FileSorterFromDir(FileSorter):
+    """
+        Класс "раскидывает" по папкам файлы из переданного ему источника.
+        Источником является папка с файлами.
+
+        Папки назначения создаются на основании даты создания файлов в источнике.
+    """
+
+    def _sort(self):
 
         if os.path.isdir(self.source):
             cprint(f'Исходящая папка "{self.source}" найдена', color='yellow')
@@ -71,14 +91,14 @@ class FileSorter:
 
         self._check_destination()
 
-        cprint(f'Копируем файлы из файла "{self.source}" в папку "{self.destination}":', color='yellow')
+        cprint(f'Копируем файлы из папки "{self.source}" в папку "{self.destination}":', color='yellow')
         counter = 0
 
         for dir_path, dir_names, file_names in os.walk(self.source):
             for file in file_names:
                 path_to_file = os.path.join(dir_path, file)
-                seconds = os.path.getmtime(path_to_file)
-                date = time.gmtime(seconds)
+                timestamp = os.path.getmtime(path_to_file)
+                date = time.gmtime(timestamp)
                 destination = os.path.join(self.destination, str(date[0]), str(date[1]), str(date[2]))
 
                 os.makedirs(destination, exist_ok=True)
@@ -94,14 +114,6 @@ class FileSorter:
 
         print()
         cprint('Все готово!', color='yellow')
-
-    def start(self):
-        self._sort()
-
-# Усложненное задание (делать по желанию)
-# Нужно обрабатывать zip-файл, содержащий фотографии, без предварительного извлечения файлов в папку.
-# Основная функция должна брать параметром имя zip-файла и имя целевой папки.
-# Для этого пригодится шаблон проектирование "Шаблонный метод" см https://goo.gl/Vz4828
 
 
 class FileSorterFromZip(FileSorter):
@@ -131,30 +143,23 @@ class FileSorterFromZip(FileSorter):
             with zipfile.ZipFile(self.source) as zip_file:
                 for file in zip_file.namelist():
                     file_info = zip_file.getinfo(file)
-                    path_to_file, filename = os.path.split(file)
-                    date_time = file_info.date_time
-                    path = os.path.join(self.destination, str(date_time[0]), str(date_time[1]), str(date_time[2]))
                     if not file_info.is_dir():
-                        result = zip_file.open(file)
-                        os.makedirs(path, exist_ok=True)
+                        path_to_file, filename = os.path.split(file)
+                        date_time = file_info.date_time
+                        path = os.path.join(self.destination, str(date_time[0]), str(date_time[1]), str(date_time[2]))
 
-                        """
-                            Не смог разобраться (гугл тоже не помог) каким образом распаковать файлы из архива с
-                            сохранением метаданных (дата и время создания файла).
-                            Если использовать метод zip_fil.extract(file, path) файл рапаковывается в нужную папку,
-                            с "родными" метаданными но с сохранением путей которые указаны в архиве 
-                            (например: "icons/actions"). В результате получаем следующую структуру:
-                            "icons_by_year/2017/6/2/icons/actions"
-                            
-                            Буду счастлив если подскажете куда копать. :-)
-                            Сохранение метаданных файла не трубуется в этом задании,
-                            но вы можете попробывать после извлечения файла устанваливать ему
-                            время доступа и модификации через os.utime https://docs.python.org/3/library/os.html#os.utime
+                        result = zip_file.open(file)  # Открываем файл из архива
+                        os.makedirs(path, exist_ok=True)  # создаем все необходимые папки
+                        file_name = os.path.join(path, filename)  # Определяем полный путь к файлу
 
-                        """
+                        with open(file_name, 'wb') as outfile:
+                            shutil.copyfileobj(result, outfile)  # Записываем данные из архива в файл
 
-                        with open(os.path.join(path, filename), 'wb') as outfile:
-                            shutil.copyfileobj(result, outfile)
+                        file_datetime = datetime.datetime(*date_time)  # Создаем объект для хранения метаданных
+                        file_meta_data = file_datetime.timestamp()  # Конвертируем в timestamp
+                        os.utime(file_name, (file_meta_data, file_meta_data))  # Записываем метаданные в файл.
+
+                    # Вышенаписанное - какоето жонглирование данными. :-(
 
                     # Выводим индикатор выполнения, чтобы небыло скучно ждать :-)
                     if counter == 10:
@@ -171,8 +176,6 @@ class FileSorterFromZip(FileSorter):
 
 
 if __name__ == '__main__':
-    sorter = FileSorterFromZip('icons.zip', 'icons_by_year')
-    sorter.start()
 
-# TODO Лучше сделать родительский класс для FileSorterFromZip и FileSorter, реализующий общие методы
-#  и содержащий абстрактный метод _sort
+    sorter = FileSorterFromDir('icons', 'icons_by_year')
+    sorter.start()
