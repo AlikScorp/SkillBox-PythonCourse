@@ -101,6 +101,8 @@ class CharCounter:
                 cprint(f'Файл не найден в папке "{dir_path}"', color='red')
         return True if self.path_to_file else False
 
+    # TODO Не понятно, для чего нужно свойство sort. Вы его задаете но не используете.
+    #  И название sort для текстового обозначния типа сортировки сбивает с толку.
     @property
     def sort(self):
         return self._sort
@@ -139,6 +141,8 @@ class CharCounter:
             data = file.readline()
             self._count_in_line(data=data)
 
+    # TODO Этот метод должен переопределяеться потомками.
+    #  Лучше сделать его пустым (pass) и пометить его декоратором abstractmethod из библиотеки abc
     def _sorting(self):
         for symbol in self.symbols:
             print(f"|{symbol:^10}|{self.symbols[symbol]:>10}|")

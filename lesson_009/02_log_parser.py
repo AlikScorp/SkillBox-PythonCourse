@@ -108,3 +108,5 @@ if __name__ == '__main__':
 
     log_parser = choice[selected][1]('events.txt')
     log_parser.output()
+
+# зачет!
