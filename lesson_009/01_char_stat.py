@@ -24,6 +24,8 @@
 import operator
 import os.path
 import zipfile
+from abc import abstractmethod
+
 from termcolor import cprint, colored
 
 
@@ -89,7 +91,7 @@ class CharCounter:
         self.filename = filename
         self.path_to_file = ''
         self.symbols = {}
-        self.sort = 'Не сортировано.'
+        self._type_of_sorting = 'Не сортировано.'
 
     def _find_file(self):
         cprint('Ищем входной файл ...', color='yellow')
@@ -101,19 +103,17 @@ class CharCounter:
                 cprint(f'Файл не найден в папке "{dir_path}"', color='red')
         return True if self.path_to_file else False
 
-    # TODO Не понятно, для чего нужно свойство sort. Вы его задаете но не используете.
-    #  И название sort для текстового обозначния типа сортировки сбивает с толку.
     @property
-    def sort(self):
-        return self._sort
+    def type_of_sorting(self):
+        return self._type_of_sorting
 
-    @sort.setter
-    def sort(self, sort: str):
-        self._sort = sort
+    @type_of_sorting.setter
+    def type_of_sorting(self, type_of_sorting: str):
+        self._type_of_sorting = type_of_sorting
 
-    @sort.deleter
-    def sort(self):
-        _sort = 'Не сортировано.'
+    @type_of_sorting.deleter
+    def type_of_sorting(self):
+        self._type_of_sorting = 'Не сортировано.'
 
     def _count_in_line(self, data):
         """
@@ -141,11 +141,9 @@ class CharCounter:
             data = file.readline()
             self._count_in_line(data=data)
 
-    # TODO Этот метод должен переопределяеться потомками.
-    #  Лучше сделать его пустым (pass) и пометить его декоратором abstractmethod из библиотеки abc
+    @abstractmethod
     def _sorting(self):
-        for symbol in self.symbols:
-            print(f"|{symbol:^10}|{self.symbols[symbol]:>10}|")
+        pass
 
     def _count(self):
 
@@ -180,7 +178,7 @@ class CharCounter:
     def output(self):
 
         if self._count():
-            cprint(f'Выводим результаты подсчета (Тип сортировки - {self._sort}):', color='yellow')
+            cprint(f'Выводим результаты подсчета (Тип сортировки - {self._type_of_sorting}):', color='yellow')
         else:
             cprint('Не найден входной файл!', color='red')
             return
@@ -208,10 +206,6 @@ class CharCounterSortedAlphabet(CharCounter):
         Метод output выводит результаты подсчета отсортированые по алфавиту (по возрастанию)
     """
 
-    def __init__(self, filename):
-        super().__init__(filename=filename)
-        self.sort = 'По алфавиту (по возрастанию).'
-
     def _sorting(self):
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
@@ -225,10 +219,6 @@ class CharCounterSortedAlphabetReverse(CharCounter):
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по алфавиту (по убыванию)
     """
-
-    def __init__(self, filename):
-        super().__init__(filename=filename)
-        self.sort = 'По алфавиту (по убыванию)'
 
     def _sorting(self):
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
@@ -244,10 +234,6 @@ class CharCounterSortedQuantity(CharCounter):
         Метод output выводит результаты подсчета отсортированые по частоте использования (по возрастанию)
     """
 
-    def __init__(self, filename):
-        super().__init__(filename=filename)
-        self.sort = 'По частоте использования (по возрастанию).'
-
     def _sorting(self):
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -262,10 +248,6 @@ class CharCounterSortedQuantityReverse(CharCounter):
         Метод output выводит результаты подсчета отсортированые по частоте использования (по убыванию)
     """
 
-    def __init__(self, filename):
-        super().__init__(filename=filename)
-        self.sort = 'По частоте использования (по убыванию)'
-
     def _sorting(self):
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -275,11 +257,11 @@ class CharCounterSortedQuantityReverse(CharCounter):
 
 
 if __name__ == '__main__':
-    choice = {'1': ['Не сортированно', CharCounter],
-              '2': ['Сортировка по алфавиту - по возрастанию', CharCounterSortedAlphabet],
-              '3': ['Сортировка по алфавиту - по убыванию', CharCounterSortedAlphabetReverse],
-              '4': ['Сортировка по частоте использования - по возрастанию', CharCounterSortedQuantity],
-              '5': ['Сортировка по частоте использования - по убыванию', CharCounterSortedQuantityReverse],
+    choice = {
+              '1': ['Сортировка по алфавиту - по возрастанию', CharCounterSortedAlphabet],
+              '2': ['Сортировка по алфавиту - по убыванию', CharCounterSortedAlphabetReverse],
+              '3': ['Сортировка по частоте использования - по возрастанию', CharCounterSortedQuantity],
+              '4': ['Сортировка по частоте использования - по убыванию', CharCounterSortedQuantityReverse],
               }
 
     cprint('Варианты сортировки:', color='yellow')
@@ -292,4 +274,5 @@ if __name__ == '__main__':
             break
 
     counter = choice[selected][1]('voyna-i-mir.txt.zip')
+    counter.type_of_sorting = choice[selected][0]  # А если вот так! :-) - Переименовал свойство и теперь использую.
     counter.output()
