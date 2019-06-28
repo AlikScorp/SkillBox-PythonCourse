@@ -45,7 +45,9 @@ class ProgressBar:
         self.max_value = max_value
         self._value = 0
         self._symbol = '*'
-
+    # TODO Не обязательно делать property c геттером и сеттером. Обычно достаточно переменной экземпляра или класса.
+    #  Делать свойство (функцию с декоратором property нужно только в случаях, когда нужно
+    #  как то контролировать значение или обрабатывть факт его изменения.
     @property
     def value(self):
         return self._value
@@ -274,5 +276,13 @@ if __name__ == '__main__':
             break
 
     counter = choice[selected][1]('voyna-i-mir.txt.zip')
+    # TODO Возможно я не совсем понятно доносил до вас этот момент при предыдущих проверках, но
+    #  то что сейчас называется type_of_sorting лучше сделать переменной класса. Логика в том,
+    #  что название сортировки должно быть одинаково у всех экземпляров этого класса.
+    #  Это позволит в choice хранить только ссылку на класс, и при необходимости ее извлекать.
+    #  Например, если type_of_sorting заменить на name, то получится:
+    #  for key, counter in choice.items():
+    #      cprint(f'{key}: {counter.name}', color='cyan')
+
     counter.type_of_sorting = choice[selected][0]  # А если вот так! :-) - Переименовал свойство и теперь использую.
     counter.output()
