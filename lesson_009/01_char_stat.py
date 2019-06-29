@@ -45,9 +45,7 @@ class ProgressBar:
         self.max_value = max_value
         self._value = 0
         self._symbol = '*'
-    # TODO Не обязательно делать property c геттером и сеттером. Обычно достаточно переменной экземпляра или класса.
-    #  Делать свойство (функцию с декоратором property нужно только в случаях, когда нужно
-    #  как то контролировать значение или обрабатывть факт его изменения.
+
     @property
     def value(self):
         return self._value
