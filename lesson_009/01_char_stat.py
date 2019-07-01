@@ -87,11 +87,12 @@ class CharCounter:
         Метод output выводит результаты подсчета (результаты не сортированы)
     """
 
+    name: str = ''  # Переменная содержит название сортировки в которой выводятся данные.
+
     def __init__(self, filename):
         self.filename = filename
         self.path_to_file = ''
         self.symbols = {}
-        self._type_of_sorting = 'Не сортировано.'
 
     def _find_file(self):
         cprint('Ищем входной файл ...', color='yellow')
@@ -102,18 +103,6 @@ class CharCounter:
             else:
                 cprint(f'Файл не найден в папке "{dir_path}"', color='red')
         return True if self.path_to_file else False
-
-    @property
-    def type_of_sorting(self):
-        return self._type_of_sorting
-
-    @type_of_sorting.setter
-    def type_of_sorting(self, type_of_sorting: str):
-        self._type_of_sorting = type_of_sorting
-
-    @type_of_sorting.deleter
-    def type_of_sorting(self):
-        self._type_of_sorting = 'Не сортировано.'
 
     def _count_in_line(self, data):
         """
@@ -178,7 +167,7 @@ class CharCounter:
     def output(self):
 
         if self._count():
-            cprint(f'Выводим результаты подсчета (Тип сортировки - {self._type_of_sorting}):', color='yellow')
+            cprint(f'Выводим результаты подсчета (Тип сортировки - "{self.name}"):', color='yellow')
         else:
             cprint('Не найден входной файл!', color='red')
             return
@@ -206,6 +195,8 @@ class CharCounterSortedAlphabet(CharCounter):
         Метод output выводит результаты подсчета отсортированые по алфавиту (по возрастанию)
     """
 
+    name = "Сортировка по алфавиту - по возрастанию"
+
     def _sorting(self):
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
 
@@ -219,6 +210,8 @@ class CharCounterSortedAlphabetReverse(CharCounter):
         Класс переопределяет метод output из класса CharCounter
         Метод output выводит результаты подсчета отсортированые по алфавиту (по убыванию)
     """
+
+    name = "Сортировка по алфавиту - по убыванию"
 
     def _sorting(self):
         keys = list(self.symbols.keys())  # Создаем лист из ключей словаря self.symbol
@@ -234,6 +227,8 @@ class CharCounterSortedQuantity(CharCounter):
         Метод output выводит результаты подсчета отсортированые по частоте использования (по возрастанию)
     """
 
+    name = "Сортировка по частоте использования - по возрастанию"
+
     def _sorting(self):
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -248,6 +243,8 @@ class CharCounterSortedQuantityReverse(CharCounter):
         Метод output выводит результаты подсчета отсортированые по частоте использования (по убыванию)
     """
 
+    name = "Сортировка по частоте использования - по убыванию"
+
     def _sorting(self):
         items = list(self.symbols.items())  # Создаем лист кортежей типа (key, value) из словаря self.symbol
 
@@ -258,10 +255,10 @@ class CharCounterSortedQuantityReverse(CharCounter):
 
 if __name__ == '__main__':
     choice = {
-              '1': ['Сортировка по алфавиту - по возрастанию', CharCounterSortedAlphabet],
-              '2': ['Сортировка по алфавиту - по убыванию', CharCounterSortedAlphabetReverse],
-              '3': ['Сортировка по частоте использования - по возрастанию', CharCounterSortedQuantity],
-              '4': ['Сортировка по частоте использования - по убыванию', CharCounterSortedQuantityReverse],
+              '1': [CharCounterSortedAlphabet.name, CharCounterSortedAlphabet],
+              '2': [CharCounterSortedAlphabetReverse.name, CharCounterSortedAlphabetReverse],
+              '3': [CharCounterSortedQuantity.name, CharCounterSortedQuantity],
+              '4': [CharCounterSortedQuantityReverse.name, CharCounterSortedQuantityReverse],
               }
 
     cprint('Варианты сортировки:', color='yellow')
@@ -274,13 +271,4 @@ if __name__ == '__main__':
             break
 
     counter = choice[selected][1]('voyna-i-mir.txt.zip')
-    # TODO Возможно я не совсем понятно доносил до вас этот момент при предыдущих проверках, но
-    #  то что сейчас называется type_of_sorting лучше сделать переменной класса. Логика в том,
-    #  что название сортировки должно быть одинаково у всех экземпляров этого класса.
-    #  Это позволит в choice хранить только ссылку на класс, и при необходимости ее извлекать.
-    #  Например, если type_of_sorting заменить на name, то получится:
-    #  for key, counter in choice.items():
-    #      cprint(f'{key}: {counter.name}', color='cyan')
-
-    counter.type_of_sorting = choice[selected][0]  # А если вот так! :-) - Переименовал свойство и теперь использую.
     counter.output()
