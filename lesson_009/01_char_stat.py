@@ -254,6 +254,8 @@ class CharCounterSortedQuantityReverse(CharCounter):
 
 
 if __name__ == '__main__':
+    # При прошлой проверке я писал, что в словаре лучше оставить только ссылки на классы
+    #  и приводил пример кода. Текущий вариант кажется мне избыточным
     choice = {
               '1': [CharCounterSortedAlphabet.name, CharCounterSortedAlphabet],
               '2': [CharCounterSortedAlphabetReverse.name, CharCounterSortedAlphabetReverse],
@@ -264,6 +266,9 @@ if __name__ == '__main__':
     cprint('Варианты сортировки:', color='yellow')
 
     while True:
+        # Мне кажется, что код:
+        #  for key, counter in choice.items():
+        #      cprint(f'{key}: {counter.name}', color='cyan')
         for key, item in choice.items():
             cprint(f'{key}: {item[0]}', color='cyan')
         selected = input(colored('Выберите вариант сортировки: ', color='cyan'))
@@ -272,3 +277,5 @@ if __name__ == '__main__':
 
     counter = choice[selected][1]('voyna-i-mir.txt.zip')
     counter.output()
+
+# зачет!
