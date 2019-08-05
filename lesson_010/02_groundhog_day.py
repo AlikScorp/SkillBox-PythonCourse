@@ -89,3 +89,5 @@ finally:
 print(f'The total karma is: {total_karma}')
 
 # https://goo.gl/JnsDqu
+
+# зачет!
