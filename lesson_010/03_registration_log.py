@@ -38,10 +38,8 @@ def check_name(name: str) -> bool:
     :param name: Строковая переменная
     :return: В случае успеха возвращает True
     """
-    # TODO метод isalpha можно применять ко всей строке. Цикл не нужен.
-    for s in name:
-        if not s.isalpha():
-            raise NotNameError('Username must be alphabetic')
+    if not name.isalpha():
+        raise NotNameError('Username must be alphabetic')
 
     return True
 
