@@ -117,3 +117,5 @@ finally:
 
     if bad_records is not None:
         bad_records.close()
+
+# зачет!
