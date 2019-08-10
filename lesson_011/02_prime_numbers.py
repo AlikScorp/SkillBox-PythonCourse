@@ -22,8 +22,28 @@ def get_prime_numbers(n):
 
 
 class PrimeNumbers:
-    pass
-    # TODO здесь ваш код
+
+    def __init__(self, n):
+        self.item, self.n = 2, n
+        self.prime_numbers = []
+
+    def __iter__(self):
+        self.item = 2
+        self.prime_numbers = []
+        return self
+
+    def __next__(self):
+
+        for item in range(self.item, self.n+1):
+            for prime in self.prime_numbers:
+                if item % prime == 0:
+                    break
+            else:
+                self.prime_numbers.append(item)
+                self.item = item
+                return self.item
+
+        raise StopIteration
 
 
 prime_number_iterator = PrimeNumbers(n=10000)
@@ -42,8 +62,8 @@ def prime_numbers_generator(n):
     # TODO здесь ваш код
 
 
-for number in prime_numbers_generator(n=10000):
-    print(number)
+# for number in prime_numbers_generator(n=10000):
+#     print(number)
 
 
 # Часть 3
