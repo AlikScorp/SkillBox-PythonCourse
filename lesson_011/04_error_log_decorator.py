@@ -18,26 +18,25 @@ def log_errors(filename: str):
     :return: Функцию-декоратор
     """
 
-    file = None
-
-    try:
-        file = open(filename, 'a', encoding='utf8')
-    except IOError:
-        cprint(f'Cannot open the file "{filename}"')
-        raise SystemExit
-    else:
-        def log_decorator(func):
-            def surrogate(*args, **kwargs):
+    def log_decorator(func):
+        def surrogate(*args, **kwargs):
+            try:
+                result = func(*args, **kwargs)
+            except (ValueError, ZeroDivisionError) as exc:
                 try:
-                    result = func(*args, **kwargs)
-                except (ValueError, ZeroDivisionError) as exc:
+                    file = open(filename, 'a', encoding='utf8')
+                except IOError:
+                    cprint(f'Cannot open the file "{filename}"')
+                    raise SystemExit
+                else:
                     file.write(f'The function "{func.__name__}" with parameters: {args}, {kwargs} '
                                f'has raised the following exception: {exc}\n')
-                else:
-                    return result
-            return surrogate
+                    file.close()
+            else:
+                return result
+        return surrogate
 
-        return log_decorator
+    return log_decorator
 
 # Проверить работу на следующих функциях
 @log_errors(filename='function_errors.log')
