@@ -23,6 +23,7 @@ class LogParser:
         self.filename = filename
 
     def __iter__(self):
+        # TODO Нужно разделить на две строки.
         self.result, self.count = '', 0
 
         try:
@@ -47,6 +48,7 @@ class LogParser:
                     self.count += 1
                 else:
                     self.result, result = result, self.result
+                    # TODO Здесь лучше будет не экономить строки а расписать на две строки.
                     self.count, count = 1, self.count
                     return result, count
         else:

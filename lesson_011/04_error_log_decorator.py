@@ -78,3 +78,4 @@ perky(param=42)
 # def func():
 #     pass
 
+# зачет!
