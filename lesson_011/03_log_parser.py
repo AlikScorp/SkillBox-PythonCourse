@@ -23,8 +23,8 @@ class LogParser:
         self.filename = filename
 
     def __iter__(self):
-        # TODO Нужно разделить на две строки.
-        self.result, self.count = '', 0
+        self.result = ''
+        self.count = 0
 
         try:
             self.file = open(self.filename, 'r', encoding='utf8')
@@ -48,8 +48,8 @@ class LogParser:
                     self.count += 1
                 else:
                     self.result, result = result, self.result
-                    # TODO Здесь лучше будет не экономить строки а расписать на две строки.
-                    self.count, count = 1, self.count
+                    count = self.count
+                    self.count = 1
                     return result, count
         else:
             self.file.close()
