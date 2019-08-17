@@ -94,3 +94,5 @@ if __name__ == '__main__':
     # grouped_events = log_parser(filename='events.txt')  # А можно функцию-генератор :-)
     for group_time, event_count in grouped_events:
         print(f'[{group_time}] {event_count}')
+
+# зачет!
