@@ -6,11 +6,9 @@
 
 def get_prime_numbers(n):
     prime_numbers = []
-    # TODO в данном случае это не ошибка, но иногда использование одинаковых названий для переменных в разных
-    #  областях видимости может вызвать плохо диагностируемые проблемы.
-    for number in range(2, n+1):
+    for num in range(2, n+1):
         for prime in prime_numbers:
-            if number % prime == 0:
+            if num % prime == 0:
                 break
         else:
             prime_numbers.append(number)
@@ -26,8 +24,8 @@ def get_prime_numbers(n):
 class PrimeNumbers:
 
     def __init__(self, n):
-        # TODO В python считается плохим стилем делать несколько присваиваний в одной строке.
-        self.item, self.n = 2, n
+        self.item = 2
+        self.n = n
         self.prime_numbers = []
 
     def __iter__(self):
