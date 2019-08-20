@@ -6,13 +6,14 @@
 
 def get_prime_numbers(n):
     prime_numbers = []
-    for num in range(2, n+1):
+    for num in range(2, n + 1):
         for prime in prime_numbers:
             if num % prime == 0:
                 break
         else:
-            prime_numbers.append(number)
+            prime_numbers.append(num)
     return prime_numbers
+
 
 # Часть 1
 # На основе алгоритма get_prime_numbers создать класс итерируемых обьектов,
@@ -35,7 +36,7 @@ class PrimeNumbers:
 
     def __next__(self):
 
-        for item in range(self.item, self.n+1):
+        for item in range(self.item, self.n + 1):
             for prime in self.prime_numbers:
                 if item % prime == 0:
                     break
@@ -47,25 +48,32 @@ class PrimeNumbers:
         raise StopIteration
 
 
-prime_number_iterator = PrimeNumbers(n=10000)
-for number in prime_number_iterator:
-    print(number)
+# prime_number_iterator = PrimeNumbers(n=10000)
+# for number in prime_number_iterator:
+#     print(number)
 
 
 # после подтверждения части 1 преподователем, можно делать
-# TODO Переходите ко второй части.
 # Часть 2
 # Теперь нужно создать генератор, который выдает последовательность простых чисел до n
 # Распечатать все простые числа до 10000 в столбик
 
 
 def prime_numbers_generator(n):
-    pass
-    # TODO здесь ваш код
+    prime_numbers = []
+    for num in range(2, n + 1):
+        for prime in prime_numbers:
+            if num % prime == 0:
+                break
+        else:
+            prime_numbers.append(num)
+            yield num
 
 
-# for number in prime_numbers_generator(n=10000):
-#     print(number)
+print('Prime numbers by generator:', '[', sep='\n', end='')
+for number in prime_numbers_generator(n=10000):
+    print(number, end=', ')
+print(']')
 
 
 # Часть 3
@@ -83,3 +91,78 @@ def prime_numbers_generator(n):
 # простых счастливых палиндромных чисел и так далее. Придумать не менее 2х способов.
 #
 # Подсказка: возможно, нужно будет добавить параметр в итератор/генератор.
+
+
+# TODO Не уврен в правильности релизации задания, возможно что я неправильно его понял.
+# TODO Может быть фильтрацию нужно заложить в сам генератор или итератор?
+
+
+def is_lucky_number(n: int) -> bool:
+    """
+        Функция проверяет полученное число на "счастливость" - сумма первых цифр равна сумме последних.
+        Если число имеет нечетное число цифр, то для вычисления берется равное количество символов с начала и конца.
+    :param n: Целое число
+    :return: True если переданное чило счастливое и False в противном случае
+    """
+    str_number = str(n)
+    length = len(str_number)
+    half = length // 2
+
+    if length == 1:
+        return False
+
+    if length % 2 == 0:
+        return is_parts_equal(str_number[:half], str_number[half:])
+    else:
+        return is_parts_equal(str_number[:half], str_number[half + 1:])
+
+
+def is_parts_equal(first: str, second: str) -> bool:
+    """
+        Функция сумирует цифры в полученных переменных и проверяет полученные суммы на равенство.
+    :param first: Первое число
+    :param second: Второе число
+    :return: True если числа равны и False в противном случае
+    """
+
+    left_part = list(map(lambda x: int(x), first))
+    right_part = list(map(lambda x: int(x), second))
+
+    return sum(left_part) == sum(right_part)
+
+
+def is_palindrome_number(n: int) -> bool:
+    str_number = str(n)
+
+    return str_number == str_number[-1::-1]
+
+
+def is_sophie_germain_number(n: int) -> bool:
+
+    num = 2*n + 1
+
+    if num < 2:
+        return False
+    result = True
+    for i in range(2, num):
+        if num % i == 0:
+            result = False
+            break
+    return result
+
+
+lucky_numbers = list(filter(is_lucky_number, prime_numbers_generator(n=10000)))
+print("List of prime and lucky numbers:", lucky_numbers, sep='\n')
+
+palindrome_numbers = list(filter(is_palindrome_number, prime_numbers_generator(n=10000)))
+print("List of prime and palindrome numbers:", palindrome_numbers, sep='\n')
+
+prime_numbers_10000 = list(prime_numbers_generator(n=10000))
+sophie_germain_numbers = list(filter(is_sophie_germain_number, prime_numbers_generator(n=10000)))
+print("List of prime and Sophie Germain numbers:", sophie_germain_numbers, sep='\n')
+
+#  Накладываем дополнительный фильтр на уже отфильтрованный список
+sophie_germain_palindrome_numbers = list(filter(is_sophie_germain_number, palindrome_numbers))
+print("List of prime and Sophie Germain palindrome numbers:", sophie_germain_palindrome_numbers, sep='\n')
+
+#  Искать простые "счастливые" палиндромные числа помоему нет смысла - любой полиндром будет "счастливым" числом
