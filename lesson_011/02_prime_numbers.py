@@ -59,7 +59,13 @@ class PrimeNumbers:
 # Распечатать все простые числа до 10000 в столбик
 
 
-def prime_numbers_generator(n):
+def prime_numbers_generator(n: int, func=None):
+    """
+        Функция-генератор, возвращает простые числа в отрезке от 2 до n.
+    :param n: Максимальная граница для поиска
+    :param func: Дополнительно принемаемая функция-фильтр для отбора
+    :return:
+    """
     prime_numbers = []
     for num in range(2, n + 1):
         for prime in prime_numbers:
@@ -67,7 +73,13 @@ def prime_numbers_generator(n):
                 break
         else:
             prime_numbers.append(num)
-            yield num
+            if func is None:
+                yield num
+            else:
+                if func(num):
+                    yield num
+                else:
+                    continue
 
 
 print('Prime numbers by generator:', '[', sep='\n', end='')
@@ -95,8 +107,6 @@ print(']')
 
 # Не уврен в правильности релизации задания, возможно что я неправильно его понял.
 # Может быть фильтрацию нужно заложить в сам генератор или итератор?
-# TODO Один способ фильтрации вы применили. Можно изменить генератор так, чтобы он принимал функцию фильтр в качестве
-#  аргумента.
 
 def is_lucky_number(n: int) -> bool:
     """
@@ -123,31 +133,38 @@ def is_parts_equal(first: str, second: str) -> bool:
         Функция сумирует цифры в полученных переменных и проверяет полученные суммы на равенство.
     :param first: Первое число
     :param second: Второе число
-    :return: True если числа равны и False в противном случае
+    :return: True если суммы цифр в first и second равны и False в противном случае
     """
-    # TODO lambda и list лишние. Для получения суммы чисел достаточно sum(map(first, int))
-    left_part = list(map(lambda x: int(x), first))
-    right_part = list(map(lambda x: int(x), second))
 
-    return sum(left_part) == sum(right_part)
+    return sum(map(int, first)) == sum(map(int, second))
 
 
-# TODO докстринги закончились. 😞
 def is_palindrome_number(n: int) -> bool:
+    """
+        Функция проверяем является ли принимаемое число палиндромом
+    :param n: Проверяемое число
+    :return: True если число является палинромом False в противном случае
+    """
     str_number = str(n)
 
     return str_number == str_number[-1::-1]
 
 
 def is_sophie_germain_number(n: int) -> bool:
-    # TODO Здесь точно не хватает докстринга, поясняющего что за числа у вас должны получиться
+    """
+        Функция проверяет является ли принимаемое простое число простым числом Софи Жермен.
+        Простое число n является простым числом Софи Жермен если 2n+1 также простое число.
+    :param n: Простое число
+    :return: True в случае если n является простым числом Софи Жермен и False в противном случае.
+    """
+
     num = 2*n + 1
 
     if num < 2:
         return False
     result = True
-    # TODO Достаточно проверять числа до num ** 0.5
-    for i in range(2, num):
+
+    for i in range(2, int(num/2)):
         if num % i == 0:
             result = False
             break
@@ -156,17 +173,22 @@ def is_sophie_germain_number(n: int) -> bool:
 
 lucky_numbers = list(filter(is_lucky_number, prime_numbers_generator(n=10000)))
 print("List of prime and lucky numbers:", lucky_numbers, sep='\n')
-
-palindrome_numbers = list(filter(is_palindrome_number, prime_numbers_generator(n=10000)))
-print("List of prime and palindrome numbers:", palindrome_numbers, sep='\n')
-
+#
+# palindrome_numbers = list(filter(is_palindrome_number, prime_numbers_generator(n=10000)))
+# print("List of prime and palindrome numbers:", palindrome_numbers, sep='\n')
+#
 prime_numbers_10000 = list(prime_numbers_generator(n=10000))
 sophie_germain_numbers = list(filter(is_sophie_germain_number, prime_numbers_generator(n=10000)))
 print("List of prime and Sophie Germain numbers:", sophie_germain_numbers, sep='\n')
 
 #  Накладываем дополнительный фильтр на уже отфильтрованный список
-sophie_germain_palindrome_numbers = list(filter(is_sophie_germain_number, palindrome_numbers))
-print("List of prime and Sophie Germain palindrome numbers:", sophie_germain_palindrome_numbers, sep='\n')
+# sophie_germain_palindrome_numbers = list(filter(is_sophie_germain_number, palindrome_numbers))
+# print("List of prime and Sophie Germain palindrome numbers:", sophie_germain_palindrome_numbers, sep='\n')
 
 #  Искать простые "счастливые" палиндромные числа помоему нет смысла - любой полиндром будет "счастливым" числом
 #  Палиндром нечётной длины не будет счастливым.
+
+print('Prime numbers by generator with internal filtration:', '[', sep='\n', end='')
+for number in prime_numbers_generator(n=10000, func=is_sophie_germain_number):
+    print(number, end=', ')
+print(']')
