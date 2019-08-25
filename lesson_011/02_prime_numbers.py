@@ -192,3 +192,5 @@ print('Prime numbers by generator with internal filtration:', '[', sep='\n', end
 for number in prime_numbers_generator(n=10000, func=is_sophie_germain_number):
     print(number, end=', ')
 print(']')
+
+# зачет!
