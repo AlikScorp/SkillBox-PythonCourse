@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import time
 
 
 def time_track(func):
-    def inner(*args, **kwargs):
+    def surrogate(*args, **kwargs):
         started_at = time.time()
 
         result = func(*args, **kwargs)
@@ -12,5 +11,4 @@ def time_track(func):
         elapsed = round(ended_at - started_at, 4)
         print(f'Функция работала {elapsed} секунд(ы)')
         return result
-    return inner
-
+    return surrogate
