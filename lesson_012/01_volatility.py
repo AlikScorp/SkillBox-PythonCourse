@@ -72,6 +72,7 @@
 #
 #     def run(self):
 #         <обработка данных>
+import operator
 import os
 
 
@@ -94,44 +95,24 @@ class Storage:
         :param ticker_data: Кортеж с информацией о тикере и его волатильности
         :return: None
         """
-        # TODO Можно отделять тикеры с нулевой волатильностью в этом месте.
-        #  От них нужны только названия.
-        #  Кортежи тикеров с ненулевой волатильностью можно напрямую добавлять в список.
+        if ticker_data[1] == 0:
+            self.volatility_zero.append(ticker_data[0])
+            return
+
         self.storage[ticker_data[0]] = ticker_data[1]
 
-    def analyse(self):
+    def sorting(self):
         """
-            Метод анализирует имеющийся словарь тикеров.
-            В результате анализа создает список с отсортированными (по волатильности) по убыванию тикерами и
-            список тикеров с нулевыми ваолатильностями
-        :return: False в случае если словарь пуст и анализ невозможен. True если анализ произведен.
+            Метод сортирует имеющийся словарь тикеров.
+            В результате создает список с отсортированными (по волатильности) по убыванию тикерами.
+        :return: False в случае если словарь пуст и сортировка невозможна. True если сортировка произведена.
         """
-        if not self.storage:                        # Проверяем наличие информации в словаре. Если словарь пуст
-            return False                            # возвращаем False.
+        if not self.storage:
+            return False
 
-        for key, item in self.storage.items():      # Берем запись из словаря тикеров
-            if item == 0:                           # Проверяем волатильность на равенство нулю. Если равно нулю
-                self.volatility_zero.append(key)    # добавляем информацию в словарь тикеров с нулевой волатильностью
-                continue                            # и пререходим к следующей итерации
-            # TODO Неплохо, что вы подумали над своей реализацией сортировки,
-            #  но в данном случае лучше довериться встроенным средствам python
-            #  и его стандартной библиотеке.
-            #  Мы можем воспользоваться встроенной функцией sorted и отсортировать тикеры.
-            #  Удобнее будет использовать список, содержащий списки или кортежи.
-            #  Можно использовать и словарь. Начиная с python 3.6 гарантируется
-            #  сохранение порядка значений в словаре. Но из словаря не так удобно получить
-            #  срез элементов.
-            if not self.ordered_list:                   # Преверяем есть ли записи в отсортированном словаре тикеров.
-                self.ordered_list.append((key, item))   # Если нет, добавляем первую запись.
-            else:                                               # Если записи есть, то
-                i = -1                                          # Инициализируем начальный счетчик,
-                for ticker, volatility in self.ordered_list:    # берем запись из отсортированного списка тикеров
-                    if item < volatility:                       # Если волатильность из словаря меньше чем в списке
-                        i += 1                                  # Увеличиваем счетчик
+        self.ordered_list = sorted(self.storage.items(), key=operator.itemgetter(1), reverse=True)
 
-                self.ordered_list.insert(i+1, (key, item))      # Вставляем запись в нужное место (отсортированно)
-
-        return True                                 # Список сформирован, отсортирован - возвращаем True.
+        return True
 
     def display(self):
         """
@@ -140,18 +121,18 @@ class Storage:
         :return: None
         """
 
-        if not self.ordered_list:               # Проверяем проводился ли анализ словаря тикеров.
-            if not self.analyse():              # Если нет то проводим анализ. В случае если словарь тикеров пуст
-                print('В хранилище пусто!!!')   # Сообщаем об этом.
-                return                          # Заканчиваем работу.
+        if not self.ordered_list:
+            if not self.sorting():
+                print('В хранилище пусто!!!')
+                return
 
         print('Максимальная волатильность:')
-        for i in range(3):
-            print(f'\t{self.ordered_list[i][0]} - {self.ordered_list[i][1]:3.2f} %')
+        for ticker, price in self.ordered_list[:3]:
+            print(f'\t{ticker} - {price:3.2f} %')
 
         print('Минимальная волатильность:')
-        for i in range(3, 0, -1):
-            print(f'\t{self.ordered_list[-i][0]} - {self.ordered_list[-i][1]:3.2f} %')
+        for ticker, price in self.ordered_list[-3:]:
+            print(f'\t{ticker} - {price:3.2f} %')
 
         print('Нулевая волатильность:')
         volatility_zero_sorted = sorted(self.volatility_zero)
@@ -169,13 +150,11 @@ class VolatilityCounter:
     """
 
     def __init__(self, file_name: str, data_storage: Storage):
-        # TODO Смысл переменных достаточно понятен и без комментариев.
-        self.file_name: str = file_name                                 # Имя файла с результатами торгов
-        self.max_price: float = 0                                       # Максимальная цена за тикер
-        self.min_price: float = 0                                       # Минимальная цена за тикер
-        self.trade_results: list = []                                   # Список цен за тикер
-        self.volatility: float = 0                                      # Волатильность тикера
-        self.storage = data_storage                                     # Хранилище для волатильности тикера
+        self.file_name: str = file_name
+        self.max_price: float = 0
+        self.min_price: float = 0
+        self.volatility: float = 0
+        self.storage = data_storage
 
     def run(self):
         """
@@ -183,30 +162,26 @@ class VolatilityCounter:
             Определяет минимальную и максимальную цены, высчитывает волатильность и заносит информацию в хранилище
         :return:
         """
-        # TODO Большое количество комментариев − плохая практика.
-        #  Код живет во времени, его часто меняют. А комментарии − забывают менять
-        #  и они становятся мертвым мешающим грузом − в коде одно, в коментариях другое.
-        #  Поэтому лучше что бы код читался как коментарий:
-        #  with open(self.file_name, 'r', encoding='utf8') as f:  # Открываем файл с результатами торгов
-        #  Комментарий здесь явно лишний. Для описания того, что происходит в функции вы уже написали докстринг.
-        #  Удаляйте все комментарии и пишите такой код, который ясен читающему его.
-        with open(self.file_name, 'r', encoding='utf8') as f:           # Открываем файл с результатами торгов
-            f.readline()                                                # Считываем первую строку с названиями столбцов
-            for line in f:                                              # Считываем след строку
+
+        with open(self.file_name, 'r', encoding='utf8') as f:
+            f.readline()
+            for line in f:
                 ticker_id, trade_time, price, quantity = line.split(',')
-                # Разбиваем строку по "столбцам"
-                # TODO В этой задаче нам не нужны все цены для расчёта волатильности.
-                #  Достаточно задать перед циклом переменные для минимального и максимального
-                #  значений и, при необходимости обновлять их внутри цикла.
-                self.trade_results.append(float(price))                     # добавляем в список цену за тикер
+                price = float(price)
 
-        self.max_price = max(self.trade_results)                        # Определяем максимальную цену за тикер
-        self.min_price = min(self.trade_results)                        # Определяем минимальную цену за тикер
+                if self.max_price == 0:
+                    self.max_price = price
+                else:
+                    self.max_price = price if self.max_price < price else self.max_price
 
-        self.volatility = (2 * (self.max_price - self.min_price) /      # Считаем волатильность
-                           (self.max_price + self.min_price) * 100)
+                if self.min_price == 0:
+                    self.min_price = price
+                else:
+                    self.min_price = price if self.min_price > price else self.min_price
 
-        self.storage.append((ticker_id, self.volatility, 2))    # Сохраняем инормацию о тикере и его волатильности
+        self.volatility = 200 * (self.max_price - self.min_price)/(self.max_price + self.min_price)
+
+        self.storage.append((ticker_id, self.volatility, 2))
 
 
 if __name__ == '__main__':
@@ -220,5 +195,3 @@ if __name__ == '__main__':
                 vol.run()
 
     storage.display()
-
-# TODO После устранения замечаний переходите ко второй части.
