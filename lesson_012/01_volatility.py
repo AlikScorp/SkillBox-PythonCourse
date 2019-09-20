@@ -184,7 +184,7 @@ class VolatilityCounter:
         self.storage.append((ticker_id, self.volatility, 2))
 
 
-if __name__ == '__main__':
+def main():
     storage = Storage()
 
     for root, folders, files in os.walk('trades'):
@@ -195,3 +195,7 @@ if __name__ == '__main__':
                 vol.run()
 
     storage.display()
+
+
+if __name__ == '__main__':
+    main()
