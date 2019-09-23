@@ -165,6 +165,10 @@ class VolatilityCounter:
 
         with open(self.file_name, 'r', encoding='utf8') as f:
             f.readline()
+            # TODO Лучше извлекать первую строку с данными и заполнять max_price и min_price
+            #  её значениями. Это позволит уменьшить количество проверок внутри цикла.
+            #  Также это позволит получить значение ticker_id, а в цикле получать
+            #  только значение цены.
             for line in f:
                 ticker_id, trade_time, price, quantity = line.split(',')
                 price = float(price)
