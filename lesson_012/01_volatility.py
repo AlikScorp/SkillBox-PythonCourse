@@ -148,12 +148,22 @@ class VolatilityCounter:
         данных по подсчету волатильности.
         Результат вычислений заносит в экземляр класса Storage.
     """
+    # TODO Давно хотел спросить, если таким вот образом объявлять переменные, они будут переменными класа?
+    #  Или же они становятся переменными класа только в том случае, если происходит инициализация присваиванием
+    #  типа filename: str = 'test.txt'?
+    #  Хотя ... судя по тому что скрипт работает корректно ... они остаются переменными экземпляра класса.
+
+    file_name: str
+    max_price: float
+    min_price: float
+    volatility: float
+    storage: Storage
 
     def __init__(self, file_name: str, data_storage: Storage):
-        self.file_name: str = file_name
-        self.max_price: float = 0
-        self.min_price: float = 0
-        self.volatility: float = 0
+        self.file_name = file_name
+        self.max_price = 0
+        self.min_price = 0
+        self.volatility = 0
         self.storage = data_storage
 
     def run(self):
@@ -164,28 +174,22 @@ class VolatilityCounter:
         """
 
         with open(self.file_name, 'r', encoding='utf8') as f:
-            f.readline()
-            # TODO Лучше извлекать первую строку с данными и заполнять max_price и min_price
-            #  её значениями. Это позволит уменьшить количество проверок внутри цикла.
-            #  Также это позволит получить значение ticker_id, а в цикле получать
-            #  только значение цены.
+            f.readline()  # Считываем и отбрасываем первую строку с названиями колонок.
+
+            line = f.readline()
+            ticker_id, trade_time, price, quantity = line.split(',')
+            self.min_price = self.max_price = float(price)
+
             for line in f:
-                ticker_id, trade_time, price, quantity = line.split(',')
-                price = float(price)
 
-                if self.max_price == 0:
-                    self.max_price = price
-                else:
-                    self.max_price = price if self.max_price < price else self.max_price
+                price = float(line.split(',')[2])
 
-                if self.min_price == 0:
-                    self.min_price = price
-                else:
-                    self.min_price = price if self.min_price > price else self.min_price
+                self.max_price = price if self.max_price < price else self.max_price
+                self.min_price = price if self.min_price > price else self.min_price
 
         self.volatility = 200 * (self.max_price - self.min_price)/(self.max_price + self.min_price)
 
-        self.storage.append((ticker_id, self.volatility, 2))
+        self.storage.append((ticker_id, self.volatility))
 
 
 def main():
