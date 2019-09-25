@@ -33,7 +33,6 @@ class Storage:
         self.storage: dict = {}
         self.ordered_list: list = []
         self.volatility_zero: list = []
-        self.lock = RLock()
 
     def append(self, ticker_data: tuple):
         """
@@ -43,21 +42,10 @@ class Storage:
         :return: None
         """
 
-        #  У меня нет уверенности что использование RLock в даном месте необходимо.
-        #  Здесь выполняется добаление элемента либо в список либо в словарь. Обе операции являются атомарными
-        #  Я проверял выполнение без использование RLock и все выполнялось корректно,
-        #  но возможно у нас не те объемы инфрмации чтобы возникали какие-либо коллизии.
-        #  Я не прав?
-        #  Вы правы и операции добавления элементов в Python атомарны и лок не нужен. Но в этом месте вы
-        #  столкнулись с тем, что при переводе неплохого однопоточного кода можно
-        #  столкнуться с некоторыми сложностями.
-        #  TODO Это задание можно изменить таким образом, чтобы
-        #   добавлять результат в Storage после завершения работы трэда.
-        with self.lock:
-            if ticker_data[1] == 0:
-                self.volatility_zero.append(ticker_data[0])
-            else:
-                self.storage[ticker_data[0]] = ticker_data[1]
+        if ticker_data[1] == 0:
+            self.volatility_zero.append(ticker_data[0])
+        else:
+            self.storage[ticker_data[0]] = ticker_data[1]
 
     def sorting(self):
         """
@@ -107,13 +95,37 @@ class VolatilityCounter(Thread):
         Результат вычислений заносит в экземляр класса Storage.
     """
 
-    def __init__(self, file_name: str, data_storage: Storage):
+    def __init__(self, file_name: str):
         super().__init__()
         self.file_name: str = file_name
         self.max_price: float = 0
         self.min_price: float = 0
-        self.volatility: float = 0
-        self.storage = data_storage
+        self._volatility: float = 0
+        self._ticker_id = ''
+
+    @property
+    def volatility(self):
+        return self._volatility
+
+    @volatility.setter
+    def volatility(self, volatility):
+        self._volatility = volatility
+
+    @volatility.deleter
+    def volatility(self):
+        self._volatility = 0
+
+    @property
+    def ticker_id(self):
+        return self._ticker_id
+
+    @ticker_id.setter
+    def ticker_id(self, ticker_id):
+        self._ticker_id = ticker_id
+
+    @ticker_id.deleter
+    def ticker_id(self):
+        self._ticker_id = ''
 
     def run(self):
         """
@@ -138,9 +150,10 @@ class VolatilityCounter(Thread):
                 else:
                     self.min_price = price if self.min_price > price else self.min_price
 
-        self.volatility = 200 * (self.max_price - self.min_price)/(self.max_price + self.min_price)
+        volatility = 200 * (self.max_price - self.min_price)/(self.max_price + self.min_price)
 
-        self.storage.append((ticker_id, self.volatility, 2))
+        self.ticker_id = ticker_id
+        self.volatility = volatility
 
 
 def main():
@@ -151,15 +164,16 @@ def main():
         for file in files:
             path_to_file = os.path.join(os.getcwd(), root, file)
             if os.path.isfile(path_to_file):
-                counter_threads.append(VolatilityCounter(path_to_file, storage))
+                counter_threads.append(VolatilityCounter(path_to_file))
 
     for thread in counter_threads:
         thread.start()
 
     for thread in counter_threads:
         thread.join()
+        storage.append((thread.ticker_id, thread.volatility))  # После завершения треда сохраняем результат
 
-    storage.display()
+    storage.display()  # Выводим результаты выполнения всех тредов.
 
 
 if __name__ == '__main__':
