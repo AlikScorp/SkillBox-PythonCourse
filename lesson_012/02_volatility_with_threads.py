@@ -100,35 +100,8 @@ class VolatilityCounter(Thread):
         self.file_name: str = file_name
         self.max_price: float = 0
         self.min_price: float = 0
-        self._volatility: float = 0
-        self._ticker_id = ''
-    # TODO Мне кажется, что в данном случае добавление свойств (property) не нужно. Добавлять свойства имеет
-    #  смысл, если нужно защитить переменную от внешнего изменения, проверить соответствие
-    #  данных каким-либо требованиям или иным способом изменить стандартное поведение в работе с переменными объекта.
-    #  Также свойства могут использоваться для кэширования данных или ленивых вычислений.
-    @property
-    def volatility(self):
-        return self._volatility
-
-    @volatility.setter
-    def volatility(self, volatility):
-        self._volatility = volatility
-
-    @volatility.deleter
-    def volatility(self):
-        self._volatility = 0
-
-    @property
-    def ticker_id(self):
-        return self._ticker_id
-
-    @ticker_id.setter
-    def ticker_id(self, ticker_id):
-        self._ticker_id = ticker_id
-
-    @ticker_id.deleter
-    def ticker_id(self):
-        self._ticker_id = ''
+        self.volatility: float = 0
+        self.ticker_id = ''
 
     def run(self):
         """
@@ -181,5 +154,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# TODO После исправления замечаний переходите к 3 части.

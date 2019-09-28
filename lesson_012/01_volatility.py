@@ -148,28 +148,13 @@ class VolatilityCounter:
         данных по подсчету волатильности.
         Результат вычислений заносит в экземляр класса Storage.
     """
-    # Давно хотел спросить, если таким вот образом объявлять переменные, они будут переменными класа?
-    #  Или же они становятся переменными класа только в том случае, если происходит инициализация присваиванием
-    #  типа filename: str = 'test.txt'?
-    #  Хотя ... судя по тому что скрипт работает корректно ... они остаются переменными экземпляра класса.
-    #  Переменные, объявленные таким образом являются переменными класса. Вы можете задать VolatilityCounter.file_name
-    #  и file_name измениться у всех экземпляров этого класса. Это работает до того момента, пока вы не изменяете
-    #  такие переменные в экземплярах класса. После изменения переменная становится переменной экземпляра и на неё
-    #  уже не влияет изменение переменной класса.
-    #  TODO Переменные, добавленные на класс лучше убрать.
-
-    file_name: str
-    max_price: float
-    min_price: float
-    volatility: float
-    storage: Storage
 
     def __init__(self, file_name: str, data_storage: Storage):
-        self.file_name = file_name
-        self.max_price = 0
-        self.min_price = 0
-        self.volatility = 0
-        self.storage = data_storage
+        self.file_name: str = file_name
+        self.max_price: float = 0
+        self.min_price: float = 0
+        self.volatility: float = 0
+        self.storage: Storage = data_storage
 
     def run(self):
         """
