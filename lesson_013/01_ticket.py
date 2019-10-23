@@ -39,10 +39,14 @@ class ImageFiller:
     PH_TYPE: int = 1
     PH_VALUE: int = 2
 
+    # TODO Константы, обозначающие статус загруженного изобращения лучше заменить на enum.IntEnum
+    #  из стандартной библиотеки.
     IMAGE_NOT_LOADED = 0
     IMAGE_LOADED = 1
     IMAGE_READY = 2
 
+    # TODO Можно не задавать эти аттрибуты на классе, т. к. они заменяются
+    #  аттрибутами экземпляра при его инициализации
     _status = IMAGE_NOT_LOADED
 
     _path_to_template: str
@@ -50,6 +54,7 @@ class ImageFiller:
 
     def __init__(self, path: str) -> None:
 
+        # TODO Как обрабатывается ситуация, когда передан не файл
         if os.path.isfile(path):
             self.template = Image.open(path)
             self.status = self.IMAGE_LOADED
@@ -156,8 +161,14 @@ class ImageFiller:
         if self.is_loaded():
             self.image = ImageDraw.Draw(self.template)
 
+            # TODO Похоже, что вы не используете name.
+            #  Можно _placeholders.items() заменить на _placeholders.values()
             for name, value in self._placeholders.items():
                 if value[self.PH_TYPE] == 'text':
+                    # TODO Желательно предусмотреть проверку переданных данных и обрабатывать ошибки,
+                    #  которые могут возникнуть.
+                    # TODO Использования констант с индексами не самый работы с данными. Обратите внимание
+                    #  на именованные кортежи NamedTuple или dataclass, появившиеся в python 3.7
                     self.image.text(value[self.PH_PLACE], value[self.PH_VALUE], self.color, self.font)
                 else:
                     # Здесь вставляем картинку
@@ -255,7 +266,12 @@ def make_ticket(name: str, departure: str, destination: str, date: int) -> Image
     }
 
     ticket = ImageFiller(os.path.join('images', 'ticket_template.png'))
-
+    # TODO Лучше передавать данные полученные от пользователя отдельно от настроек размещения.
+    #  Для настроек можно сделать отдельный класс (предусмотрим возможность типов билетов,
+    #  отличающихся расположением элементов). Также можно предусмотреть возможность расширения
+    #  настроив один раз билет передавать данные о пассажирах и сохранять
+    #  изображения без необходимости инициализировать объект каждый раз заново, т. е.
+    #  печатать билеты разным пассажирам по одному шаблону.
     for name, value in placeholders.items():
         ticket.add_placeholder(name,
                                place_on_template=value[ImageFiller.PH_PLACE],
@@ -263,6 +279,7 @@ def make_ticket(name: str, departure: str, destination: str, date: int) -> Image
                                value_of_placeholder=value[ImageFiller.PH_VALUE],
                                )
 
+    # TODO Очень похоже, что такие настройки стоит задавать при инициализации ImageFiller
     ticket.set_text_attributes(os.path.join('fonts', 'marutya.ttf'), 15, color=ImageColor.colormap['blue'])
 
     return ticket
