@@ -12,8 +12,12 @@
 # Подходящий шрифт искать на сайте ofont.ru
 import argparse
 import os
+import re
+from dataclasses import dataclass
+from enum import IntEnum
 from sys import argv
-from typing import Tuple, Optional
+from typing import Optional
+
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 from termcolor import cprint
 
@@ -29,44 +33,109 @@ from termcolor import cprint
 # и заполнять билет.
 
 
+class ImageFillerState(IntEnum):
+    """
+        Класс содержит целочисленные перечислимые константы для класса ImageFiller
+    """
+    IMAGE_NOT_LOADED = 0
+    IMAGE_LOADED = 1
+    IMAGE_READY = 2
+
+
 class ImageFiller:
     """
         Класс предназначен для добавления элементов (графических или текстовых) в переданный ему шаблон.
         Принимает, в качестве аргумента, путь к шаблону.
         Использует плейсхолдеры для указания мест размещения данных на шаблоне.
     """
-    PH_PLACE: int = 0
-    PH_TYPE: int = 1
-    PH_VALUE: int = 2
 
-    # TODO Константы, обозначающие статус загруженного изобращения лучше заменить на enum.IntEnum
-    #  из стандартной библиотеки.
-    IMAGE_NOT_LOADED = 0
-    IMAGE_LOADED = 1
-    IMAGE_READY = 2
-
-    # TODO Можно не задавать эти аттрибуты на классе, т. к. они заменяются
-    #  аттрибутами экземпляра при его инициализации
-    _status = IMAGE_NOT_LOADED
-
+    _status: int
     _path_to_template: str
     _placeholders: dict
 
+    @dataclass
+    class ImageFillerPlaceholder:
+        """
+            Placeholder dataclass
+            name - имя плейсхолдера
+            place - координаты размещения в формате (x,y)
+            type - тип плейсхолдера. Возможные варинаты 'text' (по умолчанию) и 'image'.
+                в случае если тип плейсхолдера 'image' по переданным координатам будет размещено изображение.
+            value - значение, которое будет размещено по переданным координатам.
+                В случае если тип плейсхолдера 'image' - value должно содержать путь до файла изображения.
+        """
+        place: tuple = (0, 0)
+        type: str = 'text'
+        value: str = ''
+        _font: Optional[ImageFont.FreeTypeFont] = None
+        _color: Optional[str] = None
+
+        def __post_init__(self):
+
+            if self._font is None:
+                self._font = ImageFont.truetype(os.path.join('fonts', 'marutya.ttf'), size=15)
+
+            if self._color is None:
+                self._color = ImageColor.colormap['slateblue']
+
+        @property
+        def font(self) -> ImageFont.FreeTypeFont:
+            """
+                Getter для атрибута _font
+            :return:
+            """
+            return self._font
+
+        @font.setter
+        def font(self, font) -> bool:
+            """
+                Setter для атрибута _font
+            :param font: Экземпляр класса ImageFont
+            :return:
+            """
+            if isinstance(font, ImageFont.FreeTypeFont):
+                self._font = font
+                return True
+            else:
+                cprint('Error: Incorrect type of font. Please be sure that it is ImageFont.FreeTypeFont.', color='red')
+                return False
+
+        @property
+        def color(self) -> str:
+            """
+                Getter для атрибута _color
+            :return: _color
+            """
+            return self._color
+
+        @color.setter
+        def color(self, color) -> None:
+            """
+                Setter для атрибута _color
+            :param color: Цвет шрифта в формате '#000000'
+            :return: None
+            """
+            if len(color) == 7 and re.match("#[a-f0-9]{6}$", color):
+                self._color = color
+            else:
+                cprint('Error: Incorrect color identification. Color unchanged.', color='red')
+
     def __init__(self, path: str) -> None:
 
-        # TODO Как обрабатывается ситуация, когда передан не файл
         if os.path.isfile(path):
             self.template = Image.open(path)
-            self.status = self.IMAGE_LOADED
+            self.status = ImageFillerState.IMAGE_LOADED
+        else:
+            self.status = ImageFillerState.IMAGE_NOT_LOADED
+            cprint(f'Error: Cannot use image by the following path {path}. Please be sure the path is correct',
+                   color='red')
 
         self._path_to_template = path
         self._placeholders = dict()
         self.image = None
-        self._font = None
-        self._color = None
 
     @property
-    def status(self):
+    def status(self) -> int:
         """
             Возвращает статус объекта
         :return: Статус объекта self._status
@@ -74,84 +143,37 @@ class ImageFiller:
         return self._status
 
     @status.setter
-    def status(self, status):
+    def status(self, status) -> None:
         self._status = status
 
     @status.deleter
-    def status(self):
-        self._status = self.IMAGE_NOT_LOADED
+    def status(self) -> None:
+        self._status = ImageFillerState.IMAGE_NOT_LOADED
 
-    def is_loaded(self):
+    def is_loaded(self) -> bool:
         """
             Проверяет загружен ли шаблон изображения.
         :return: True если шаблон корректно загружен
         """
         return self.status > 0
 
-    def add_placeholder(self,
-                        name_of_placeholder: str,
-                        place_on_template: Tuple[int, int],
-                        type_of_placeholder: str = "text",
-                        value_of_placeholder: Optional[str] = None) -> bool:
+    def placeholder(self, name: str) -> ImageFillerPlaceholder:
         """
-            Добавляет плейсхолдер в шаблон
-        :param name_of_placeholder: Имя плейсхолдера
-        :param type_of_placeholder: Тип плейсхолдера (строковый или картинка)
-        :param place_on_template: Место размещения на шаблоне в формате (x, y)
-        :param value_of_placeholder: Значение в плейсхолдере (если тип - картинка, то здесь путь до нее)
-        :return: True в случае если плейсхолдер добавлен и False в противном случае
+            Добавляет плейсхолдер по умолчанию
+        :param name: Имя плейсхолдера для последующего доступа
+        :return: Созданный плейсхолдер
         """
-        if type_of_placeholder == 'text':
-            self._placeholders[name_of_placeholder] = (place_on_template, type_of_placeholder, value_of_placeholder)
-        elif type_of_placeholder == 'image':
-            if os.path.isfile(value_of_placeholder):
-                self._placeholders[name_of_placeholder] = (place_on_template, type_of_placeholder, value_of_placeholder)
-            else:
-                pass
-        else:
-            pass
+        if name not in self._placeholders.keys():
+            self._placeholders[name] = ImageFiller.ImageFillerPlaceholder()
 
-        return True
+        return self._placeholders[name]
 
-    def set_font(self, path_to_font: str, size: int) -> bool:
+    def placeholders(self) -> list:
         """
-            Устанавливает шрифт для вывода текстовой информации
-        :param path_to_font: Путь до файла шрифта
-        :param size: Размер шрифта
-        :return: True в услучае успеха и False в противном случает
+            Возвращает имена добавленных плейсхолдеров
+        :return: Список ключей из словаря плейсхолдеров
         """
-        if os.path.isfile(path_to_font):
-            self.font = ImageFont.truetype(path_to_font, size=size)
-            return True
-
-        return False
-
-    @property
-    def color(self):
-        """
-            Возвращает цвет выводимого текста
-        :return: Цвет
-        """
-        return self._color if self._color is not None else '#685faa'
-
-    @color.setter
-    def color(self, color):
-        self._color = color
-
-    @property
-    def font(self):
-        """
-            Возвращает шрифт в виде объекта ImageFont
-        :return:
-        """
-        if self._font is None:
-            self._font = ImageFont.truetype(os.path.join('fonts', 'Junegull.ttf'), 15)
-
-        return self._font
-
-    @font.setter
-    def font(self, font):
-        self._font = font
+        return list(self._placeholders.keys())
 
     def enhance(self) -> bool:
         """
@@ -161,74 +183,55 @@ class ImageFiller:
         if self.is_loaded():
             self.image = ImageDraw.Draw(self.template)
 
-            # TODO Похоже, что вы не используете name.
-            #  Можно _placeholders.items() заменить на _placeholders.values()
-            for name, value in self._placeholders.items():
-                if value[self.PH_TYPE] == 'text':
-                    # TODO Желательно предусмотреть проверку переданных данных и обрабатывать ошибки,
-                    #  которые могут возникнуть.
-                    # TODO Использования констант с индексами не самый работы с данными. Обратите внимание
-                    #  на именованные кортежи NamedTuple или dataclass, появившиеся в python 3.7
-                    self.image.text(value[self.PH_PLACE], value[self.PH_VALUE], self.color, self.font)
-                else:
-                    # Здесь вставляем картинку
-                    image = Image.open(value[self.PH_VALUE])
-                    self.template.paste(image, value[self.PH_PLACE], mask=image)
+            for placeholder in self._placeholders.values():
+                if placeholder.type == 'text':
 
-            self.status = self.IMAGE_READY
+                    self.image.text(
+                        xy=placeholder.place,
+                        text=placeholder.value,
+                        fill=placeholder.color,
+                        font=placeholder.font
+                    )
+
+                elif placeholder.type == 'image':
+                    # Здесь вставляем картинку
+                    image = Image.open(placeholder.value)
+                    self.template.paste(im=image, box=placeholder.place, mask=image)
+                else:
+                    cprint(f'Error: Incorrect value "{placeholder.type}" of placeholder type.', color='red')
+
+            self.status = ImageFillerState.IMAGE_READY
             return True
 
         return False
 
-    def display(self) -> None:
-        """
-            Выводит изображение на экран.
-        :return: None
-        """
-        if self.status == self.IMAGE_READY:
-            self.template.show()
-        elif self.status == self.IMAGE_LOADED:
-            if self.enhance():
-                self.template.show()
-        else:
-            cprint('Шаблон изображения не загружен!', color='red')
-
-    def save_to(self, path) -> bool:
+    def save_to(self, path: str, display: bool = False) -> bool:
         """
             Записывает готовое изображение в файл
         :param path: Имя файла
+        :param display: Логическая переменная, если True то выводит изображение на экран после записи в файл
         :return: True в случае успеха и False в противном случае
         """
-        if self.status == self.IMAGE_READY:
+        if self.status == ImageFillerState.IMAGE_READY:
             self.template.save(path)
-            return True
-        elif self.status == self.IMAGE_LOADED:
+        elif self.status == ImageFillerState.IMAGE_LOADED:
             if self.enhance():
                 self.template.save(path)
-                return True
             else:
                 return False
         else:
-            cprint(f'Ошибка: Шаблон изображения {self._path_to_template} не загружен!', color='red')
+            cprint(f'Error: Image template {self._path_to_template} isn\'t loaded!', color='red')
             return False
 
-    def set_text_attributes(self, path_to_font: str, size: int, color: str):
-        """
-            Выставляет атрибуты вывода текста (шрифт и цвет).
-            Метод поочередно вызывает методы self.color и self.set_font
-        :param path_to_font: Путь до файла шрифта
-        :param size: Размер шрифта
-        :param color: Цвет шрифта
-        :return:
-        """
-        self.color = color
-        self.set_font(path_to_font=path_to_font, size=size)
+        if display:
+            self.template.show()
 
 
-class TicketInfoParser(argparse.ArgumentParser):
+class CommandLineParser(argparse.ArgumentParser):
     """
         Класс потомок ArgumentParser
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -248,39 +251,50 @@ class TicketInfoParser(argparse.ArgumentParser):
         self.add_argument('--save_to', help="path to store the ticket", default='ticket.png')
 
 
-def make_ticket(name: str, departure: str, destination: str, date: int) -> ImageFiller:
+class SkillBoxTicket(ImageFiller):
+    """
+        Класс формирует билет
+    """
+    def __init__(self):
+        super().__init__(os.path.join('images', 'ticket_template.png'))
+
+        self.placeholder('Name').place = (50, 125)
+        self.placeholder('Departure').place = (50, 194)
+        self.placeholder('Destination').place = (50, 260)
+        self.placeholder('Date').place = (290, 260)
+
+        self.placeholder('Stamp').place = (476, 246)
+        self.placeholder('Stamp').type = 'image'
+        self.placeholder('Stamp').value = os.path.join("images", "stamp.png")
+
+    def values(self, name: str, departure: str, destination: str, date: str):
+        """
+            Метод добавляет значения плейсхолдеров в билет
+        :param name: Имя пасажира
+        :param departure: Пункт отправления
+        :param destination: Пункт назначения
+        :param date: Дата вылета
+        :return:
+        """
+
+        self.placeholder('Name').value = name
+        self.placeholder('Departure').value = departure
+        self.placeholder('Destination').value = destination
+        self.placeholder('Date').value = date
+
+
+def make_ticket(name: str, departure: str, destination: str, date: str) -> SkillBoxTicket:
     """
         Функция создает png-файл билета изпользуя переданные ему данные
     :param name: ФИО пассажира
     :param departure: Пункт отправления
     :param destination: Пункт назначения
     :param date: Дата вылета
-    :return: True в случае успешного создания, False  в противном случае
+    :return: Созданный билет в в виде экземпляра класса SkillBoxTicket
     """
-    placeholders = {
-        'Name': ((50, 125), "text", name),
-        'From': ((50, 194), "text", departure),
-        'To': ((50, 260), "text", destination),
-        'Date': ((290, 260), "text", date),
-        'Stamp': ((476, 246), "image", os.path.join("images", "stamp.png")),
-    }
 
-    ticket = ImageFiller(os.path.join('images', 'ticket_template.png'))
-    # TODO Лучше передавать данные полученные от пользователя отдельно от настроек размещения.
-    #  Для настроек можно сделать отдельный класс (предусмотрим возможность типов билетов,
-    #  отличающихся расположением элементов). Также можно предусмотреть возможность расширения
-    #  настроив один раз билет передавать данные о пассажирах и сохранять
-    #  изображения без необходимости инициализировать объект каждый раз заново, т. е.
-    #  печатать билеты разным пассажирам по одному шаблону.
-    for name, value in placeholders.items():
-        ticket.add_placeholder(name,
-                               place_on_template=value[ImageFiller.PH_PLACE],
-                               type_of_placeholder=value[ImageFiller.PH_TYPE],
-                               value_of_placeholder=value[ImageFiller.PH_VALUE],
-                               )
-
-    # TODO Очень похоже, что такие настройки стоит задавать при инициализации ImageFiller
-    ticket.set_text_attributes(os.path.join('fonts', 'marutya.ttf'), 15, color=ImageColor.colormap['blue'])
+    ticket = SkillBoxTicket()
+    ticket.values(name=name, departure=departure, destination=destination, date=date)
 
     return ticket
 
@@ -292,15 +306,13 @@ def main():
     :return: None
     """
 
-    parser = TicketInfoParser(description='This module is creating air-ticket by received data.')
+    parser = CommandLineParser(description='This module is creating air-ticket by received data.')
 
     if len(argv) > 1:
         args = parser.parse_args()
 
         ticket = make_ticket(name=args.name, departure=args.departure, destination=args.destination, date=args.date)
-
-        if ticket.save_to(os.path.join('images', args.save_to)):
-            ticket.display()
+        ticket.save_to(os.path.join('images', args.save_to), display=True)
     else:
         parser.print_usage()
 
