@@ -53,6 +53,8 @@ class ImageFiller:
     _path_to_template: str
     _placeholders: dict
 
+    # TODO Не вижу необходимости помещать это класс внутри ImageFiller.
+    #  Нужно вынести и поместить до ImageFiller.
     @dataclass
     class ImageFillerPlaceholder:
         """
@@ -86,6 +88,8 @@ class ImageFiller:
             """
             return self._font
 
+        # TODO Среда разработки подсвечивает предупреждение о том,
+        #  что функция сеттер не должна возвращать значение
         @font.setter
         def font(self, font) -> bool:
             """
@@ -120,6 +124,8 @@ class ImageFiller:
             else:
                 cprint('Error: Incorrect color identification. Color unchanged.', color='red')
 
+    # TODO Метод __init__ также как и другие служебные метода, начинающиеся
+    #  с двойного подчёркивания помещают в самом начале класса.
     def __init__(self, path: str) -> None:
 
         if os.path.isfile(path):
