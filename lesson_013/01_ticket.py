@@ -16,7 +16,7 @@ import re
 from dataclasses import dataclass
 from enum import IntEnum
 from sys import argv
-from typing import Optional
+from typing import Optional, Tuple
 
 from PIL import Image, ImageDraw, ImageFont, ImageColor
 from termcolor import cprint
@@ -53,9 +53,9 @@ class ImageFillerPlaceholder:
         value - значение, которое будет размещено по переданным координатам.
             В случае если тип плейсхолдера 'image' - value должно содержать путь до файла изображения.
     """
-    place: tuple = (0, 0)
-    type: str = 'text'
-    value: str = ''
+    _place: tuple = (0, 0)
+    _type: str = 'text'
+    _value: str = ''
     _font: Optional[ImageFont.FreeTypeFont] = None
     _color: Optional[str] = None
 
@@ -76,16 +76,16 @@ class ImageFillerPlaceholder:
         return self._color
 
     @color.setter
-    def color(self, color) -> None:
+    def color(self, color: str) -> None:
         """
             Setter для атрибута _color
         :param color: Цвет шрифта в формате '#000000'
         :return: None
         """
-        if len(color) == 7 and re.match("[a-f0-9]{6}$", color):
+        if len(color) == 7 and re.match("#[a-f0-9A-F]{6}$", color):
             self._color = color
         else:
-            cprint('Error: Incorrect color identification. Color left unchanged.', color='red')
+            cprint('Error: Incorrect color identification. Color left unchanged. ', color='red')
 
     @property
     def font(self) -> ImageFont.FreeTypeFont:
@@ -96,7 +96,7 @@ class ImageFillerPlaceholder:
         return self._font
 
     @font.setter
-    def font(self, font) -> None:
+    def font(self, font: ImageFont.FreeTypeFont) -> None:
         """
             Setter для атрибута _font
         :param font: Экземпляр класса ImageFont
@@ -105,7 +105,67 @@ class ImageFillerPlaceholder:
         if isinstance(font, ImageFont.FreeTypeFont):
             self._font = font
         else:
-            cprint('Error: Incorrect type of font. Please be sure that it is ImageFont.FreeTypeFont.', color='red')
+            cprint('Error: Incorrect type of font. Please be sure that it is ImageFont.FreeTypeFont. '
+                   'Font left unchanged', color='red')
+
+    @property
+    def place(self) -> Tuple[int, int]:
+        """
+            Getter для атрибута _font
+        :return: Tuple - Положение плейсхолдера на шаблоне
+        """
+        return self._place
+
+    @place.setter
+    def place(self, place: Tuple[int, int]) -> None:
+        """
+            Setter для атрибута _place
+        :param place:
+        :return: None
+        """
+        if isinstance(place, tuple) and len(place) == 2:
+            for element in place:
+                if not isinstance(element, int):
+                    raise ValueError('The elements of tuple should be integer.')
+
+            self._place = place
+        else:
+            raise ValueError('Parameter "place" should be a tuple with two elements of type integer.')
+
+    @property
+    def type(self) -> str:
+        """
+            Getter для параметра _type
+        :return:
+        """
+        return self._type
+
+    @type.setter
+    def type(self, type_of_element: str) -> None:
+        if type_of_element in ('text', 'image'):
+            self._type = type_of_element
+        else:
+            raise ValueError(f'Incorrect type of placeholder - {type_of_element}')
+
+    @property
+    def value(self) -> str:
+        """
+            Getter для параметра _value
+        :return: Атрибут _value
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value: str) -> None:
+        """
+            Setter для параметра _value
+        :param value:
+        :return: None
+        """
+        if isinstance(value, str):
+            self._value = value
+        else:
+            raise ValueError('Value of placeholder should be a string')
 
 
 class ImageFiller:
@@ -115,7 +175,7 @@ class ImageFiller:
         Использует плейсхолдеры для указания мест размещения данных на шаблоне.
     """
 
-    _status: int
+    _status: int = ImageFillerState.IMAGE_NOT_LOADED
     _path_to_template: str
     _placeholders: dict
 
@@ -125,9 +185,7 @@ class ImageFiller:
             self.template = Image.open(path)
             self.status = ImageFillerState.IMAGE_LOADED
         else:
-            self.status = ImageFillerState.IMAGE_NOT_LOADED
-            cprint(f'Error: Cannot use image by the following path {path}. Please be sure the path is correct',
-                   color='red')
+            raise ValueError(f'Cannot use image by the following path {path}. Please be sure the path is correct')
 
         self._path_to_template = path
         self._placeholders = dict()
@@ -192,12 +250,12 @@ class ImageFiller:
                         font=placeholder.font
                     )
 
-                elif placeholder.type == 'image':
-                    # Здесь вставляем картинку
-                    image = Image.open(placeholder.value)
-                    self.template.paste(im=image, box=placeholder.place, mask=image)
                 else:
-                    cprint(f'Error: Incorrect value "{placeholder.type}" of placeholder type.', color='red')
+                    if os.path.isfile(placeholder.value):
+                        image = Image.open(placeholder.value)
+                        self.template.paste(im=image, box=placeholder.place, mask=image)
+                    else:
+                        raise ValueError(f'Cannot open image-file by the following file-name {placeholder.value}')
 
             self.status = ImageFillerState.IMAGE_READY
             return True
@@ -219,8 +277,7 @@ class ImageFiller:
             else:
                 return False
         else:
-            cprint(f'Error: Image template {self._path_to_template} isn\'t loaded!', color='red')
-            return False
+            raise ValueError(f'Image template {self._path_to_template} isn\'t loaded!')
 
         if display:
             self.template.show()
