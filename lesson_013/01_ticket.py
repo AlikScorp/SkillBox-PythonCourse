@@ -42,6 +42,72 @@ class ImageFillerState(IntEnum):
     IMAGE_READY = 2
 
 
+@dataclass
+class ImageFillerPlaceholder:
+    """
+        Placeholder dataclass
+        name - имя плейсхолдера
+        place - координаты размещения в формате (x,y)
+        type - тип плейсхолдера. Возможные варинаты 'text' (по умолчанию) и 'image'.
+            в случае если тип плейсхолдера 'image' по переданным координатам будет размещено изображение.
+        value - значение, которое будет размещено по переданным координатам.
+            В случае если тип плейсхолдера 'image' - value должно содержать путь до файла изображения.
+    """
+    place: tuple = (0, 0)
+    type: str = 'text'
+    value: str = ''
+    _font: Optional[ImageFont.FreeTypeFont] = None
+    _color: Optional[str] = None
+
+    def __post_init__(self):
+
+        if self._font is None:
+            self._font = ImageFont.truetype(os.path.join('fonts', 'marutya.ttf'), size=15)
+
+        if self._color is None:
+            self._color = ImageColor.colormap['slateblue']
+
+    @property
+    def color(self) -> str:
+        """
+            Getter для атрибута _color
+        :return: _color
+        """
+        return self._color
+
+    @color.setter
+    def color(self, color) -> None:
+        """
+            Setter для атрибута _color
+        :param color: Цвет шрифта в формате '#000000'
+        :return: None
+        """
+        if len(color) == 7 and re.match("[a-f0-9]{6}$", color):
+            self._color = color
+        else:
+            cprint('Error: Incorrect color identification. Color left unchanged.', color='red')
+
+    @property
+    def font(self) -> ImageFont.FreeTypeFont:
+        """
+            Getter для атрибута _font
+        :return:
+        """
+        return self._font
+
+    @font.setter
+    def font(self, font) -> None:
+        """
+            Setter для атрибута _font
+        :param font: Экземпляр класса ImageFont
+        :return:
+        """
+        if isinstance(font, ImageFont.FreeTypeFont):
+            self._font = font
+        else:
+            cprint('Error: Incorrect type of font. Please be sure that it is ImageFont.FreeTypeFont.', color='red')
+
+
 class ImageFiller:
     """
         Класс предназначен для добавления элементов (графических или текстовых) в переданный ему шаблон.
@@ -53,79 +119,6 @@ class ImageFiller:
     _path_to_template: str
     _placeholders: dict
 
-    # TODO Не вижу необходимости помещать это класс внутри ImageFiller.
-    #  Нужно вынести и поместить до ImageFiller.
-    @dataclass
-    class ImageFillerPlaceholder:
-        """
-            Placeholder dataclass
-            name - имя плейсхолдера
-            place - координаты размещения в формате (x,y)
-            type - тип плейсхолдера. Возможные варинаты 'text' (по умолчанию) и 'image'.
-                в случае если тип плейсхолдера 'image' по переданным координатам будет размещено изображение.
-            value - значение, которое будет размещено по переданным координатам.
-                В случае если тип плейсхолдера 'image' - value должно содержать путь до файла изображения.
-        """
-        place: tuple = (0, 0)
-        type: str = 'text'
-        value: str = ''
-        _font: Optional[ImageFont.FreeTypeFont] = None
-        _color: Optional[str] = None
-
-        def __post_init__(self):
-
-            if self._font is None:
-                self._font = ImageFont.truetype(os.path.join('fonts', 'marutya.ttf'), size=15)
-
-            if self._color is None:
-                self._color = ImageColor.colormap['slateblue']
-
-        @property
-        def font(self) -> ImageFont.FreeTypeFont:
-            """
-                Getter для атрибута _font
-            :return:
-            """
-            return self._font
-
-        # TODO Среда разработки подсвечивает предупреждение о том,
-        #  что функция сеттер не должна возвращать значение
-        @font.setter
-        def font(self, font) -> bool:
-            """
-                Setter для атрибута _font
-            :param font: Экземпляр класса ImageFont
-            :return:
-            """
-            if isinstance(font, ImageFont.FreeTypeFont):
-                self._font = font
-                return True
-            else:
-                cprint('Error: Incorrect type of font. Please be sure that it is ImageFont.FreeTypeFont.', color='red')
-                return False
-
-        @property
-        def color(self) -> str:
-            """
-                Getter для атрибута _color
-            :return: _color
-            """
-            return self._color
-
-        @color.setter
-        def color(self, color) -> None:
-            """
-                Setter для атрибута _color
-            :param color: Цвет шрифта в формате '#000000'
-            :return: None
-            """
-            if len(color) == 7 and re.match("#[a-f0-9]{6}$", color):
-                self._color = color
-            else:
-                cprint('Error: Incorrect color identification. Color unchanged.', color='red')
-
-    # TODO Метод __init__ также как и другие служебные метода, начинающиеся
-    #  с двойного подчёркивания помещают в самом начале класса.
     def __init__(self, path: str) -> None:
 
         if os.path.isfile(path):
@@ -170,7 +163,7 @@ class ImageFiller:
         :return: Созданный плейсхолдер
         """
         if name not in self._placeholders.keys():
-            self._placeholders[name] = ImageFiller.ImageFillerPlaceholder()
+            self._placeholders[name] = ImageFillerPlaceholder()
 
         return self._placeholders[name]
 
@@ -261,6 +254,7 @@ class SkillBoxTicket(ImageFiller):
     """
         Класс формирует билет
     """
+
     def __init__(self):
         super().__init__(os.path.join('images', 'ticket_template.png'))
 
