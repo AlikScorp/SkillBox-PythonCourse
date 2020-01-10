@@ -29,7 +29,45 @@
 # Скрипт должен принимать параметр --result и печатать на консоль:
 #   Количество очков для результатов ХХХ - УУУ.
 
-# TODO тут ваш код
+from sys import argv
+
+from bowling import Bowling
+from argparse import ArgumentParser
+
+
+class CMDParser(ArgumentParser):
+    """
+        Класс работает с командной строкой.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.add_argument('-frames', help="Number of frames in the game. Default - 10 frames.")
+        self.add_argument('--result', help="Result of the game ")
+
+
+def main():
+    """
+        Функция main
+    """
+
+    parser = CMDParser()
+
+    if len(argv) > 1:
+        args = parser.parse_args()
+
+        if args.frames:
+            game = Bowling(game_result=args.result, frames=int(args.frames))
+        else:
+            game = Bowling(game_result=args.result)
+
+        print(f'Количество очков для результата "{args.result}" - {game.get_score()}')
+    else:
+        parser.print_usage()
+
+
+if __name__ == '__main__':
+    main()
 
 # При написании кода помнить, что заказчик может захотеть доработок и новых возможностей...
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
