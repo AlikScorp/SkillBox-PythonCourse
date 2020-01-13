@@ -1,0 +1,6 @@
+# -*- coding: utf-8 -*-
+"""
+    Settings for ChatBot
+"""
+TOKEN = ''
+GROUP_ID = 187871287

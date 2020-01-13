@@ -3,16 +3,31 @@
     Эхобот для VK
 """
 import random
+import logging
+# from typing import Optional
 
 import vk_api
-from _token import token
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+
+try:
+    import settings
+except ImportError:
+    exit('Please copy settings.py.default to setting.py and add your token and group_id into it.')
 
 
 class EchoBot:
     """
-        Класс представляет собой эхо-бот в который передается id группы и token для работы c API соцсети VK
+        Класс представляет собой эхо-бот в который передается id группы (group) и token для работы c API соцсети VK
     """
+
+    group_id: str
+    group_title: str
+    token: str
+    vk: vk_api.vk_api.VkApi
+    vk_long_pol: vk_api.bot_longpoll.VkBotLongPoll
+    api: vk_api.vk_api.VkApiMethod
+    logger: logging.Logger
+    # __event: Optional[vk_api.bot_longpoll.VkBotEvent]
 
     def __init__(self, group, token):
         self.group_id = group
@@ -24,6 +39,31 @@ class EchoBot:
         self.api = self.vk.get_api()
         self.group_title = self.get_group_title()
 
+        self.__logger_customizer()
+        # self.__event = None
+
+    def __logger_customizer(self):
+        """
+            Метод настравиает logging.Logger
+        :return: None
+        """
+        self.logger = logging.getLogger('bot')
+
+        datetime_format = '%d.%m.%Y %H:%M:%S'
+
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s",
+                                                      datefmt=datetime_format))
+        stream_handler.setLevel(logging.INFO)
+
+        file_handler = logging.FileHandler('bot.log', encoding='utf8', delay=True)
+        file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s: %(message)s", datefmt=datetime_format))
+        file_handler.setLevel(logging.DEBUG)
+
+        self.logger.addHandler(stream_handler)
+        self.logger.addHandler(file_handler)
+        self.logger.setLevel(logging.DEBUG)
+
     def run(self):
         """
             Метод осуществляет запуск бота.
@@ -31,16 +71,16 @@ class EchoBot:
         :return: None
         """
 
-        print('Listen to events...')
+        self.logger.info('Listen to events...')
 
         for event in self.long_poll.listen():
             try:
                 self.on_event(event=event)
             except SystemExit:
-                print("Exiting!!!")
+                self.logger.info(f'Exiting!!!')
                 exit()
             except Exception as exc:
-                print(exc)
+                self.logger.exception(f'Случилось что-то неппредвиденное: {exc}')
 
     def get_group_title(self):
         """
@@ -79,10 +119,12 @@ class EchoBot:
         """
 
         sender = self.get_user_info(user_id=event.object.from_id)
+        sender_full_name = sender['first_name'] + ' ' + sender['last_name']
         message = self.get_greetings(user=sender)
         message = message + f"К сожалению, на ваше сообщение \"{event.object.text}\" мне пока нечего ответить."
 
         self.api.messages.send(message=message, random_id=random.randint(0, 2 ** 20), peer_id=event.object.peer_id)
+        self.logger.info(f'Отправили пользователю {sender_full_name} следующее сообщение: "{message}"')
 
     def get_greetings(self, user):
         """
@@ -105,10 +147,12 @@ class EchoBot:
 
         for member_id in members['items']:
             user_info = self.get_user_info(user_id=member_id)
+            user_full_name = user_info['first_name'] + ' ' + user_info['last_name']
 
             message = self.get_greetings(user_info) if message is None else message
 
             if member_id == 36414847:
+                self.logger.debug(f'Отправили пользователю {user_full_name} следующее сообщение: "{message}"')
                 return self.send_message_to_user(message=message, user_id=member_id)
 
     def send_message_to_user(self, user_id: int, message: str = None):
@@ -123,7 +167,7 @@ class EchoBot:
 
     def send_greetings(self, user_id):
         """
-            Посылает привествие новому члену сообщества
+            Посылает пприветствие новому члену сообщества
         :param user_id:
         :return: Результат выполнения метода send
         """
@@ -134,20 +178,25 @@ class EchoBot:
         """
             Послыает сообщение пользователю вышедшему из сообщества
         :param user_id: ID пользователя которому посылается сообщение
-        :return:
+        :return: Результат выполнения метода send
         """
         user_info = self.get_user_info(user_id)
         message = f"Очень жаль, что {user_info['first_name']} {user_info['last_name']} покинул группу " \
                   f"\"{self.group_title}\".\n" \
                   f"Возвращайтесь, мы всегда будем Вам рады."
+
+        self.logger.info(f'Пользователь {user_info["first_name"]} {user_info["last_name"]} '
+                         f'покинул группу {self.group_title}')
+
         return self.send_message_to_user(message=message, user_id=user_id)
 
     def on_event(self, event):
         """
             Метод реагирует на события
-        :param event:
-        :return:
+        :param event: VkBotMessageEvent object
+        :return: None
         """
+
         if event.object.text == "Hasta la vista, baby":
             raise SystemExit
 
@@ -158,11 +207,17 @@ class EchoBot:
         elif event.type == VkBotEventType.GROUP_LEAVE:
             self.send_farewell(user_id=event.object.user_id)
         else:
-            print(f'Какое-то, пока, неизвестное мне событие {event.type}.\n{event}')
+            self.logger.debug(f'Какое-то, пока, неизвестное мне событие {event.type}.')
+
+
+def main():
+    """
+        Функция вызывается в случае непосредстевнного запуска скрипта.
+    :return:
+    """
+    bot = EchoBot(settings.GROUP_ID, token=settings.TOKEN)
+    bot.run()
 
 
 if __name__ == '__main__':
-    group_id = 187871287
-
-    bot = EchoBot(group_id, token=token)
-    bot.run()
+    main()
