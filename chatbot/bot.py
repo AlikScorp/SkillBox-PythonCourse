@@ -10,7 +10,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 try:
-    import settings
+    from settings import TOKEN, GROUP_ID
 except ImportError:
     exit('Please copy settings.py.default to setting.py and add your token and group_id into it.')
 
@@ -215,7 +215,7 @@ def main():
         Функция вызывается в случае непосредстевнного запуска скрипта.
     :return:
     """
-    bot = EchoBot(settings.GROUP_ID, token=settings.TOKEN)
+    bot = EchoBot(GROUP_ID, token=TOKEN)
     bot.run()
 
 
