@@ -5,6 +5,7 @@ import re
 from typing import List, Optional
 
 
+# TODO Не забывыйте об оформлении кода и стандарте PEP8.
 class Bowling:
     """
         Класс выполняет подсчет результатов бросков в боулинге.
@@ -23,6 +24,7 @@ class Bowling:
         self.__number_of_frames = frames
         self.__result = 0
 
+        # TODO Забытый комментарий?
         # assert self.__number_of_frames == len(self.__frames), 'Количество фреймов не соответствует результатам игры'
 
         if self.__number_of_frames != len(self.__frames):
