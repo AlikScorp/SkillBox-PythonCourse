@@ -51,3 +51,6 @@ class BowlingTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+# TODO На тесте game_result='55XX', frames=3 должна быть ошибка,
+#  т.к. в первом фрейме все 10 кеглей сбиты и должно быть /
+# TODO game_result='4XXX', frames=3 должна быть ошибка
