@@ -1,15 +1,16 @@
+# -*- coding: utf-8 -*-
 """
     Модуль для посчета результатов игры в боулинг
 """
 import re
+from collections import Counter
 from typing import List, Optional
 
 
-# TODO Не забывыйте об оформлении кода и стандарте PEP8.
 class Bowling:
     """
         Класс выполняет подсчет результатов бросков в боулинге.
-        Принемает результат игры в виде строки (пример: "82--5/-67-37x283/X")
+        Принемает результат игры в виде строки (пример: "81-/5/-67-35X253/X")
     """
     __game_result: str
     __score: List
@@ -24,12 +25,7 @@ class Bowling:
         self.__number_of_frames = frames
         self.__result = 0
 
-        # TODO Забытый комментарий?
-        # assert self.__number_of_frames == len(self.__frames), 'Количество фреймов не соответствует результатам игры'
-
-        if self.__number_of_frames != len(self.__frames):
-            raise ValueError(f'Неправильное количество фреймов "{self.__number_of_frames}" '
-                             f'для указанного результата игры "{self.__game_result}"')
+        self.check_parameters()
 
     def get_score(self):
         """
@@ -76,11 +72,29 @@ class Bowling:
                 result += int(symbol)
 
             if result > 10:
-                raise ValueError(f'Неправильные результаты бросков во фрейме: "{frame}"')
+                raise ValueError(f'Результат бросков во фрейме не может быть больше 10: "{frame}"')
+            elif result == 10:
+                raise ValueError(f'Spare бросок записывает в виде <число>/, вместо: "{frame}"')
 
         self.__score.append([frame, result])
 
         return result
+
+    def check_parameters(self):
+        """
+            Метод проверяет входные параметры на валидность.
+            В случае невалидности входных параметров вызывает исключения ValueError.
+        :return: None
+        """
+
+        game_result = ''.join(self.__frames)
+
+        if game_result != self.__game_result:
+            raise ValueError(f'Ошибка при вводе результатов игры. Введены неполные или некорректные данные.')
+
+        if self.__number_of_frames != len(self.__frames):
+            raise ValueError(f'Неправильное количество фреймов "{self.__number_of_frames}" '
+                             f'для указанного результата игры "{self.__game_result}"')
 
 
 

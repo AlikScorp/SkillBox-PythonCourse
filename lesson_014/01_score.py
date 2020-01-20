@@ -30,12 +30,8 @@
 #   Количество очков для результатов ХХХ - УУУ.
 
 from sys import argv
-
-from bowling import Bowling
-# TODO Если вы разделяете импортируемые библиотеки на группы,
-#  то argparse стоит переместить в верхнюю, т. к. она является
-#  стандартной библиотекой и не требует отдельной установки.
 from argparse import ArgumentParser
+from bowling import Bowling
 
 
 class CMDParser(ArgumentParser):
@@ -71,8 +67,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-# TODO Лишние отступы в конце файла.
+
 # При написании кода помнить, что заказчик может захотеть доработок и новых возможностей...
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
-
