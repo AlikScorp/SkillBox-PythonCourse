@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+"""
+    Скрипт используя модуль bowling.py подсчитывает количество очков в игре боулинг по переданному результату игры
+    Выполняется с командной строки.
+    Для парсинга аргументов используется модуль argparse
+"""
 
 # Вас взяли на работу в молодой стартап. Идея стартапа - предоставлять сервис расчета результатов игр.
 # Начать решили с боулинга, упрощенной версии.
@@ -31,13 +36,14 @@
 
 from sys import argv
 from argparse import ArgumentParser
-from bowling import Bowling
+from lesson_014.bowling import Bowling
 
 
 class CMDParser(ArgumentParser):
     """
         Класс работает с командной строкой.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -4,14 +4,13 @@
 """
 import random
 import logging
-# from typing import Optional
-
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 try:
     from settings import TOKEN, GROUP_ID
 except ImportError:
+    TOKEN, GROUP_ID = '', ''
     exit('Please copy settings.py.default to setting.py and add your token and group_id into it.')
 
 
@@ -27,7 +26,6 @@ class EchoBot:
     vk_long_pol: vk_api.bot_longpoll.VkBotLongPoll
     api: vk_api.vk_api.VkApiMethod
     logger: logging.Logger
-    # __event: Optional[vk_api.bot_longpoll.VkBotEvent]
 
     def __init__(self, group, token):
         self.group_id = group
@@ -40,7 +38,6 @@ class EchoBot:
         self.group_title = self.get_group_title()
 
         self.__logger_customizer()
-        # self.__event = None
 
     def __logger_customizer(self):
         """
