@@ -486,10 +486,12 @@ class Game:
         Игра в Подземелье и Драконы
     """
     __hero: Hero
+    __dungeon: dict
 
-    def __init__(self, hero: Hero, location: Location):
-        self.__hero = hero
-        self.__hero.location = location
+    def __init__(self, dungeon: dict):
+        self.__dungeon = dungeon
+        self.__hero = Hero(exp=Decimal(0), time=Decimal(remaining_time))
+        self.__hero.location = Location(location_json=dungeon)
 
     @staticmethod
     def __seconds_to_time(elapsed_seconds: Decimal):
@@ -505,6 +507,14 @@ class Game:
 
         return f'{days}:{hours:02}:{minutes:02}:{seconds:02}'
 
+    def restart(self):
+        """
+            Метод обнуляет прогресс в игре
+        :return: None
+        """
+        self.__hero = Hero(exp=Decimal(0), time=Decimal(remaining_time))
+        self.__hero.location = Location(location_json=self.__dungeon)
+
     def run(self):
         """
             Метод запускает игру
@@ -514,20 +524,22 @@ class Game:
 
             if self.__hero.location.is_exit:
                 cprint('Поздравляем!!! '
-                       'История о Вашем героическом подвиге будет передоваться из поколения к поколению!',
+                       'История о Вашем героическом подвиге будет передоваться от поколения к поколению!',
                        color='magenta')
                 break
 
-            # if self.__hero.time < 0:
-            #     cprint('Ледяная речная вода заполнила подземелье и накрыла вас с головой.', color='red')
-            #     cprint('После тщетных попыток побороть сильное речное течение, '
-            #            'Вы все-таки решились вдохнуть речную воду.', color='red')
-            #     cprint('Но Вы же не рыба! Результат - известен! Вы - утонули!!!', color='red')
-            #     cprint('Боги, во славу которых вы совершаете все свои подвиги, '
-            #            'воскрешают Вас возле входа в подземелье', color='blue')
-            #
-            #     self.__hero.reviving()
-            #     # continue
+            if self.__hero.time < 0:
+                cprint('Ледяная речная вода заполнила подземелье и накрыла вас с головой.', color='red')
+                cprint('После тщетных попыток побороть сильное речное течение, '
+                       'Вы все-таки решились вдохнуть речную воду.', color='red')
+                cprint('Но Вы же не рыба! Результат - известен! Вы - утонули!!!', color='red')
+                cprint('Боги, во славу которых вы совершаете все свои подвиги, '
+                       'воскрешают Вас возле входа в подземелье.', color='blue')
+                cprint('Начните сначала и не допускайте прежних ошибок!!!', color='blue')
+
+                self.restart()
+                tm.sleep(5)
+                continue
 
             cprint('*' * 100)
             cprint(f'У вас {self.__hero.experience} опыта и осталось '
@@ -560,13 +572,15 @@ class Game:
 
         list_of_locations = dict()
 
+        cprint('Ха! А теперь пойдем ... Куда собственно идем?', color='red')
+
         for number, location in enumerate(self.__hero.location.locations):
             cprint(f'\t{number + 1}. {location.get_info()}', color='cyan')
             list_of_locations[str(number + 1)] = location
 
         choice = input('Куда пойдем (0 если передумали)? ')
 
-        if int(choice) != 0 and choice in list_of_locations.keys():
+        if choice != '0' and choice in list_of_locations.keys():
 
             if self.__hero.location.alive_monsters():
                 cprint(f'Чтобы не побеспокоить затаившихся в темноте монстров, '
@@ -584,8 +598,11 @@ class Game:
             else:
                 cprint('У Вас не достаточно опыта чтобы попасть в указанную локацию', color='red')
 
-        elif int(choice) == 0:
+        elif choice == '0':
             cprint('Нормальные герои всегда идут в обход!?', color='red')
+
+        elif choice == '':
+            cprint('Колебание не к лицу героям ...', color='red')
 
         else:
             cprint('Хм! ... Такой локации здесь нет. Поищем в другом месте ...', color='red')
@@ -605,14 +622,18 @@ class Game:
 
         choice = input('Какого монстра будем атаковать (0 если передумали)? ')
 
-        if int(choice) != 0 and choice in list_of_monsters.keys():
+        if choice != '0' and choice in list_of_monsters.keys():
             cprint(f'Атакуем монстра: {list_of_monsters[choice].title}', color='red')
             list_of_monsters[choice].is_dead = True
             self.__hero.time -= list_of_monsters[choice].time
             self.__hero.experience += list_of_monsters[choice].loot
 
-        elif int(choice) == 0:
+        elif choice == '0':
             cprint('Струсил! Струсил! Струсил! ... Шучу! Осторожность превыше всего.', color='red')
+
+        elif choice == '':
+            cprint('Колебание не к лицу героям ...', color='red')
+
         else:
             cprint('Хм! ... Такого монстра в этой локации нет. Наверняка перебежал в другую.', color='red')
 
@@ -637,12 +658,7 @@ def main():
     with open('rpg.json', 'r', encoding='utf8') as file:
         dungeon = json.load(file)
 
-    # location = Location(dungeon)
-
-    hero = Hero(exp=Decimal(0), time=Decimal(remaining_time))
-    # hero.location = Location(location_json=dungeon)
-
-    game = Game(hero=hero, location=Location(location_json=dungeon))
+    game = Game(dungeon=dungeon)
     game.run()
 
 
