@@ -95,6 +95,8 @@
 #
 # и так далее...
 from __future__ import annotations
+import csv
+import datetime
 import json
 import time as tm
 import re
@@ -132,7 +134,7 @@ class Location:
         self.parse_json(self.__location_json)
 
     @property
-    def necessary_experience(self):
+    def necessary_experience(self) -> int:
         """
             Возвращает необходимый опыт героя для прохождения в локацию
         :return: Опыт
@@ -140,11 +142,11 @@ class Location:
         return self.__necessary_experience
 
     @necessary_experience.setter
-    def necessary_experience(self, experience):
+    def necessary_experience(self, experience: int):
         self.__necessary_experience = experience
 
     @property
-    def is_exit(self):
+    def is_exit(self) -> bool:
         """
             Определяет является ли локация выходом из подземелья
         :return:
@@ -152,10 +154,10 @@ class Location:
         return self.__is_exit
 
     @is_exit.setter
-    def is_exit(self, status):
+    def is_exit(self, status: bool):
         self.__is_exit = status
 
-    def parse_json(self, location_json: dict):
+    def parse_json(self, location_json: dict) -> None:
         """
             Метод парсит json в объекты
         :return: None
@@ -178,7 +180,7 @@ class Location:
                 else:
                     raise ValueError('Неизвестный элемент ')
 
-    def __add_monster(self, monster):
+    def __add_monster(self, monster: str):
         """
             Метод добавляет монстра (class Monster) в локацию
         :param monster: Описание монстра
@@ -202,7 +204,7 @@ class Location:
         """
         return [x for x in self.__monsters if not x.is_dead]
 
-    def get_status(self):
+    def get_status(self) -> str:
         """
             Метод возвращает строку статуса локации ... кол-во монстров и внутренних локаций
         :return: Статус
@@ -217,7 +219,7 @@ class Location:
 
         return colored(status, 'grey')
 
-    def get_info(self):
+    def get_info(self) -> str:
         """
             Возвращает инофрмацию о локации
         :return: Информация в виде строки
@@ -225,7 +227,7 @@ class Location:
         return f'\t— Вход в локацию {self.title}(ttp: {self.time})'
 
     @property
-    def parent(self):
+    def parent(self) -> Location:
         """
             Возвращает "родительскую" локацию
         :return:
@@ -233,11 +235,11 @@ class Location:
         return self.__parent
 
     @parent.setter
-    def parent(self, location):
+    def parent(self, location: Location):
         self.__parent = location
 
     @property
-    def locations(self):
+    def locations(self) -> List[Location]:
         """
             Возвращает список "дочерних" локаций
         :return: Список локаций
@@ -245,7 +247,7 @@ class Location:
         return self.__locations
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
             Метод-свойство, возвращает название локации
         :return: Назавание
@@ -253,11 +255,11 @@ class Location:
         return self.__title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str):
         self.__title = title
 
     @property
-    def time(self):
+    def time(self) -> Decimal:
         """
             Метод-свойство, возвращает время необходмое для прохождения локации
         :return: Время
@@ -268,7 +270,7 @@ class Location:
     def time(self, time: Decimal):
         self.__time_to_pass = time
 
-    def __parse_title(self, title):
+    def __parse_title(self, title: str):
         title, time = title.split('_tm')
         self.title, self.time = title, Decimal(time)
 
@@ -279,7 +281,7 @@ class DungeonExit(Location):
     """
     __message: str
 
-    def __init__(self, location_json):
+    def __init__(self, location_json: dict):
         super().__init__(location_json)
 
         self.is_exit = True
@@ -296,7 +298,7 @@ class DungeonExit(Location):
             self.__message = value
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
             Метод-свойство, возвращает название локации
         :return: Назавание
@@ -304,11 +306,11 @@ class DungeonExit(Location):
         return self.__title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str):
         self.__title = title
 
     @property
-    def time(self):
+    def time(self) -> Decimal:
         """
             Метод-свойство, возвращает время необходмое для прохождения локации
         :return: Время
@@ -337,14 +339,18 @@ class Hero:
     __time: Decimal
     __elapsed_time: Decimal
     __location: Location
+    __log: List[List]
 
     def __init__(self, exp: Decimal, time: Decimal):
         self.__experience = exp
         self.__time = time
         self.__elapsed_time = Decimal('0')
+        self.__log = []
+
+        self.__log.append(field_names)
 
     @property
-    def experience(self):
+    def experience(self) -> Decimal:
         """
             Свойство-метод, возвращает текущий опыт героя
         :return: Опыт
@@ -356,7 +362,7 @@ class Hero:
         self.__experience = exp
 
     @property
-    def time(self):
+    def time(self) -> Decimal:
         """
             Свойство-метод, возвращает оставшееся количество времени героя
         :return: Время
@@ -368,7 +374,7 @@ class Hero:
         self.__time = time
 
     @property
-    def elapsed_time(self):
+    def elapsed_time(self) -> Decimal:
         """
             Свойтсво-метод, возвращает оставшееся количество времени героя
         :return: Время
@@ -380,7 +386,7 @@ class Hero:
         self.__elapsed_time = time
 
     @property
-    def location(self):
+    def location(self) -> Location:
         """
             Свойство-метод, возвращает текущее метосположение (класс Location) героя
         :return: Местоположение
@@ -388,15 +394,25 @@ class Hero:
         return self.__location
 
     @location.setter
-    def location(self, location):
+    def location(self, location: Location):
         self.__location = location
 
-    def available_actions(self):
+    def save_data(self) -> None:
         """
-            Метод возвращает список действий героя в текущей локации
+            Метод сохраняет текущее состояние героя в журнал.
         :return: None
         """
-        pass
+        self.__log.append([self.location.title, self.__experience, datetime.datetime.today()])
+
+    def dump_data(self) -> None:
+        """
+            Метод сбрасывает содержимое журнала в CSV-файл.
+        :return:
+        """
+        cprint('Сохраняем журнал игры в файл', color='magenta')
+        with open('hero_history.csv', 'w', newline='') as file:
+            csv_writer = csv.writer(file)
+            csv_writer.writerows(self.__log)
 
 
 class Monster:
@@ -418,7 +434,7 @@ class Monster:
         self.__is_dead = False
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
             Метод-свойство, возвращает название монстра
         :return: Название
@@ -426,11 +442,11 @@ class Monster:
         return self.__title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str):
         self.__title = title
 
     @property
-    def is_dead(self):
+    def is_dead(self) -> bool:
         """
             Метод возвращает состояние монстра жив/мертв
         :return:
@@ -442,7 +458,7 @@ class Monster:
         self.__is_dead = status
 
     @property
-    def loot(self):
+    def loot(self) -> Decimal:
         """
             Опыт за убийство
         :return: Количество опыта
@@ -454,7 +470,7 @@ class Monster:
         self.__loot = loot
 
     @property
-    def time(self):
+    def time(self) -> Decimal:
         """
             Время на убийство
         :return: Количество времени
@@ -494,7 +510,7 @@ class Game:
         self.__hero.location = Location(location_json=dungeon)
 
     @staticmethod
-    def __seconds_to_time(elapsed_seconds: Decimal):
+    def __seconds_to_time(elapsed_seconds: Decimal) -> str:
         """
             Переводит количество прошедших секунд в удобочитаемый формат типа DD:HH:MM:SS
         :param elapsed_seconds:
@@ -515,7 +531,7 @@ class Game:
         self.__hero = Hero(exp=Decimal(0), time=Decimal(remaining_time))
         self.__hero.location = Location(location_json=self.__dungeon)
 
-    def run(self):
+    def run(self) -> None:
         """
             Метод запускает игру
         :return:
@@ -526,6 +542,8 @@ class Game:
                 cprint('Поздравляем!!! '
                        'История о Вашем героическом подвиге будет передоваться от поколения к поколению!',
                        color='magenta')
+
+                self.__hero.dump_data()
                 break
 
             if self.__hero.time < 0:
@@ -537,6 +555,7 @@ class Game:
                        'воскрешают Вас возле входа в подземелье.', color='blue')
                 cprint('Начните сначала и не допускайте прежних ошибок!!!', color='blue')
 
+                self.__hero.dump_data()
                 self.restart()
                 tm.sleep(5)
                 continue
@@ -553,18 +572,19 @@ class Game:
             cprint('Возможные действия:', color='cyan')
             action = self.actions()
 
-            if action == 1:
+            if action == '1':
                 self.attack_monsters()
-            elif action == 2:
+            elif action == '2':
                 self.change_location()
-            elif action == 3:
+            elif action == '3':
+                self.__hero.dump_data()
                 break
             else:
-                cprint('Не корректный выбор', color='red')
+                cprint('Ммммм! ... Что-то! ... Как-то! ... Некорректный выбор!', color='red')
 
             tm.sleep(1)
 
-    def change_location(self):
+    def change_location(self) -> None:
         """
             Метод выполняет функциональность смены локации
         :return: None
@@ -607,7 +627,9 @@ class Game:
         else:
             cprint('Хм! ... Такой локации здесь нет. Поищем в другом месте ...', color='red')
 
-    def attack_monsters(self):
+        self.__hero.save_data()
+
+    def attack_monsters(self) -> None:
         """
             Метод выполняет функциональность атаки монстров
         :return:
@@ -637,8 +659,10 @@ class Game:
         else:
             cprint('Хм! ... Такого монстра в этой локации нет. Наверняка перебежал в другую.', color='red')
 
+        self.__hero.save_data()
+
     @staticmethod
-    def actions() -> int:
+    def actions() -> str:
         """
             Метод выводит информацию о возможных действиях героя
         :return: Номер действия
@@ -647,7 +671,7 @@ class Game:
         cprint('\t2. Перейти в другую локацию', color='cyan')
         cprint('\t3. Сдаться и выйти из игры', color='cyan')
 
-        return int(input(colored("Что будем делать? ", 'cyan')))
+        return input(colored("Что будем делать? ", 'cyan'))
 
 
 def main():
