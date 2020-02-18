@@ -1,13 +1,14 @@
 """
     Скрипт для тестирования ЭхоБота
 """
-
+from copy import deepcopy
 from unittest import TestCase
 from unittest.mock import patch, Mock, ANY
 
 from vk_api.bot_longpoll import VkBotMessageEvent
 
 from bot import EchoBot
+import settings
 
 
 class TestEchoBot(TestCase):
@@ -23,6 +24,26 @@ class TestEchoBot(TestCase):
         'nickname': 'AlikScorp',
         'city_title': 'Ашхабад',
     }
+
+    INPUTS = [
+        'Hi!',
+        'А когда?',
+        'Где будет конференция?',
+        'Зарегистрироваться',
+        'Альберт',
+        'alikscorp@mailru',
+        'alikscorp@mail.ru',
+    ]
+
+    EXPECTED_OUTPUTS = [
+        settings.DEFAULT_ANSWER,
+        settings.INTENTS[0]['answer'],
+        settings.INTENTS[1]['answer'],
+        settings.SCENARIOS['registration']['steps']['step1']['text'],
+        settings.SCENARIOS['registration']['steps']['step2']['text'],
+        settings.SCENARIOS['registration']['steps']['step2']['failure_text'],
+        settings.SCENARIOS['registration']['steps']['step3']['text'].format(name='Альберт', email='alikscorp@mail.ru')
+    ]
 
     def test_run(self):
         count = 5
@@ -43,26 +64,32 @@ class TestEchoBot(TestCase):
                 self.assertEqual(bot.on_event.call_count,  count, 'Метод on_event не вызывался нужное количество раз!')
 
     def test_on_event(self):
-        event = VkBotMessageEvent(raw=self.RAW_EVENT)
         send_mock = Mock()
-        get_user_info = Mock()
+        api_mock = Mock()
+        api_mock.messages.send = send_mock
+
+        events = []
+        for input_text in self.INPUTS:
+            event = deepcopy(self.RAW_EVENT)
+            event['object']['text'] = input_text
+            events.append(VkBotMessageEvent(raw=event))
+
+        long_poller_mock = Mock()
+        long_poller_mock.listen = Mock(return_value=events)
 
         with patch('bot.vk_api.VkApi'):
-            with patch('bot.VkBotLongPoll'):
+            with patch('bot.VkBotLongPoll', return_value=long_poller_mock):
                 bot = EchoBot('', '')
-                bot.api = Mock()
-                bot.get_user_info = Mock(return_value=self.SENDER_INFO)
-                bot.api.users.get = get_user_info
-                bot.api.messages.send = send_mock
+                bot.api = api_mock
+                bot.get_group_title = Mock(return_value='Python-разработчик с нуля - Курсовой проект')
+                bot.run()
 
-                message = bot.get_greetings(user=self.SENDER_INFO)
-                message = message + f"К сожалению, на ваше сообщение \"{self.RAW_EVENT['object']['text']}\" " \
-                                    f"мне пока нечего ответить."
+        assert send_mock.call_count == len(self.INPUTS)
 
-                bot.on_event(event=event)
+        real_outputs = []
 
-                send_mock.assert_called_once_with(
-                    message=message,
-                    random_id=ANY,
-                    peer_id=self.RAW_EVENT['object']['peer_id']
-                )
+        for call in send_mock.call_args_list:
+            args, kwars = call
+            real_outputs.append(kwars['message'])
+
+        assert real_outputs == self.EXPECTED_OUTPUTS

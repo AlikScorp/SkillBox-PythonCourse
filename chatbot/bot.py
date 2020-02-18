@@ -4,14 +4,27 @@
 """
 import random
 import logging
+from dataclasses import dataclass, field
+import handlers
+
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 try:
-    from settings import TOKEN, GROUP_ID
+    from settings import TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER
 except ImportError:
-    TOKEN, GROUP_ID = '', ''
+    TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER = '', '', {}, [], ''
     exit('Please copy settings.py.default to setting.py and add your token and group_id into it.')
+
+
+@dataclass
+class UserState:
+    """
+        Дата-класс, содержит информацию о пользователе.
+    """
+    scenario_name: str
+    step_name: str
+    context: dict = field(default_factory=dict)
 
 
 class EchoBot:
@@ -26,6 +39,7 @@ class EchoBot:
     vk_long_pol: vk_api.bot_longpoll.VkBotLongPoll
     api: vk_api.vk_api.VkApiMethod
     logger: logging.Logger
+    user_states: dict
 
     def __init__(self, group, token):
         self.group_id = group
@@ -36,6 +50,7 @@ class EchoBot:
         self.long_poll = VkBotLongPoll(self.vk, self.group_id)
         self.api = self.vk.get_api()
         self.group_title = self.get_group_title()
+        self.user_states = {}
 
         self.__logger_customizer()
 
@@ -77,7 +92,7 @@ class EchoBot:
                 self.logger.info(f'Exiting!!!')
                 exit()
             except Exception as exc:
-                self.logger.exception(f'Случилось что-то неппредвиденное: {exc}')
+                self.logger.exception(f'Случилось что-то непредвиденное: {exc}')
 
     def get_group_title(self):
         """
@@ -114,6 +129,9 @@ class EchoBot:
         :param event:
         :return:
         """
+
+        if int(event.object.from_id) < 0:
+            return
 
         sender = self.get_user_info(user_id=event.object.from_id)
         sender_full_name = sender['first_name'] + ' ' + sender['last_name']
@@ -196,15 +214,76 @@ class EchoBot:
 
         if event.object.text == "Hasta la vista, baby":
             raise SystemExit
-
-        if event.type == VkBotEventType.MESSAGE_NEW:
-            self.reply_on_new_message(event=event)
-        elif event.type == VkBotEventType.GROUP_JOIN:
-            self.send_greetings(user_id=event.object.user_id)
-        elif event.type == VkBotEventType.GROUP_LEAVE:
-            self.send_farewell(user_id=event.object.user_id)
-        else:
+        elif event.type != VkBotEventType.MESSAGE_NEW:
             self.logger.debug(f'Какое-то, пока, неизвестное мне событие {event.type}.')
+            return
+
+        user_id: int = event.object.peer_id
+        text: str = event.object.text
+
+        if user_id in self.user_states:
+            text_to_send = self.continue_scenario(user_id, text=event.object.text)
+        else:
+            # Ищем в интентах введенный пользователем текст
+            for intent in INTENTS:
+                self.logger.debug(f'Проверяем на совпадение с {intent}')
+                if any(token in text.lower() for token in intent['tokens']):
+                    if intent['answer']:
+                        text_to_send = intent['answer']
+                    else:
+                        text_to_send = self.start_scenario(user_id, intent['scenario'])
+
+                    break
+            else:
+                text_to_send = DEFAULT_ANSWER
+
+        self.send_message_to_user(message=text_to_send, user_id=user_id)
+
+    def start_scenario(self, user_id, scenario_name):
+        """
+            Start scenario
+        :param user_id: Идентификатор пользователя
+        :param scenario_name: Наименование сценария
+        :return: Текст для отправки пользователю
+        """
+        scenario = SCENARIOS[scenario_name]
+        first_step = scenario['first_step']
+        step = scenario['steps'][first_step]
+        text_to_send = step['text']
+
+        self.user_states[user_id] = UserState(scenario_name=scenario_name, step_name=first_step)
+
+        return text_to_send
+
+    def continue_scenario(self, user_id, text):
+        """
+            Продолжение сценария
+        :param user_id: ID пользователя
+        :param text: Текст полученный от пользователя
+        :return: text_to_send - Текст для отправки пользователю
+        """
+        state = self.user_states[user_id]
+        steps = SCENARIOS[state.scenario_name]['steps']
+        step = steps[state.step_name]
+
+        try:
+            handler = getattr(handlers, step['handler'])
+        except AttributeError as exc:
+            self.logger.info(f'Неправильный хандлер при обработке шага {state.step_name}, {exc}')
+            return 'Возникла ошибка при обработке входных данных. Приносим свои извинения.'
+
+        if handler(text=text, context=state.context):
+            next_step = steps[step['next_step']]
+            text_to_send = next_step['text'].format(**state.context)
+            if next_step['next_step']:
+                state.step_name = step['next_step']
+            else:
+                self.logger.info('Зарегистрирован пользователь: {name} <{email}>'.format(**state.context))
+                self.user_states.pop(user_id)
+        else:
+            text_to_send = step['failure_text'].format(**state.context)
+
+        return text_to_send
 
 
 def main():
