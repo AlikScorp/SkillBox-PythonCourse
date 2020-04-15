@@ -7,7 +7,7 @@ re_name = re.compile(r'^[\w\-\s]{3,40}$')
 re_email = re.compile(r'(^\b[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)\b')
 
 
-def handle_name(text: str, context: dict):
+def handle_name(text: str, context):
     """
         Handle для проверки имени
     :param text: Текст сообщения от пользователя
@@ -15,15 +15,19 @@ def handle_name(text: str, context: dict):
     :return: True/False
     """
 
+    if text.lower() == 'да':
+        context.full_name = f"{context.first_name} {context.last_name}"
+        return True
+
     match = re.match(re_name, text)
     if match:
-        context['name'] = text
+        context.full_name = text
         return True
     else:
         return False
 
 
-def handle_email(text: str, context: dict):
+def handle_email(text: str, context):
     """
         Handle длф проверки адреса электронной почты
     :param text: Текст сообщения от пользователя
@@ -32,7 +36,7 @@ def handle_email(text: str, context: dict):
     """
     matches = re.findall(re_email, text)
     if len(matches) > 0:
-        context['email'] = matches[0]
+        context.email = matches[0]
         return True
     else:
         return False

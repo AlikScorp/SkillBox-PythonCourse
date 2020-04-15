@@ -4,3 +4,84 @@
 """
 TOKEN = ''
 GROUP_ID = 187871287
+
+INTENTS = [
+    {
+        'name': 'Дата проведения',
+        'tokens': {'когда', 'сколько', 'дата', 'дату'},
+        'scenario': None,
+        'answer': 'Конференция проводится 15-го апреля, регистрация начинается в 10 утра',
+        'image': None
+    },
+    {
+        'name': 'Место проведения',
+        'tokens': {'где', 'место', 'локация', 'адрес', 'метро'},
+        'scenario': None,
+        'answer': 'Конференция пройдет в павильоне 18Г в Экспоцентре',
+        'image': "images\\skillbox.jpg"
+    },
+    {
+        'name': 'Регистрация',
+        'tokens': {'регист', 'добав'},
+        'scenario': 'registration',
+        'answer': None,
+        'image': 'images\\registration.gif'
+    },
+    {
+        'name': 'Приветствие',
+        'tokens': {'привет', 'здравст', 'драсти', 'превед'},
+        'scenario': None,
+        'answer': 'Здравствуйте, уважаемый {first_name} {last_name}!',
+        'image': 'images\\hello.gif'
+    },
+    {
+        'name': 'Прощание',
+        'tokens': {'пока', 'свидания', 'чао', 'щаслива'},
+        'scenario': None,
+        'answer': 'До свидания, уважаемый {first_name} {last_name}!',
+        'image': 'images\\bye-bye.gif'
+    },
+    {
+        'name': 'Приветствие',
+        'tokens': {'дела', 'здоровье', 'настроение'},
+        'scenario': None,
+        'answer': 'Спасибо, все отлично! Надеюсь у Вас тоже все хорошо?',
+        'image': 'images\\ok.gif'
+    },
+]
+
+SCENARIOS = {
+    'registration': {
+        'first_step': 'step1',
+        'steps': {
+            'step1': {
+                'text': 'Чтобы зарегистрироваться, введите ваше имя. Оно будет написно на бейджике. '
+                        'Если хотите использовать "{first_name} {last_name}", просто наберите "Да".',
+                'failure_text': 'Имя должно состоять из 3-30 букв и дефиса. Попробуйте еще раз.',
+                'handler': 'handle_name',
+                'next_step': 'step2',
+                'image': 'images\\registration.gif'
+            },
+            'step2': {
+                'text': 'Введите E-Mail адрес. Мы отправим на него все данные.',
+                'failure_text': 'Во введенном адресе ошибка. Попробуйте еще раз.',
+                'handler': 'handle_email',
+                'next_step': 'step3',
+                'image': None
+            },
+            'step3': {
+                'text': 'Спасибо за регистрацию, {full_name}! Мы отправили на {email} билет. Распечатайте его.'
+                        'Или используйте вот этот.',
+                'failure_text': None,
+                'handler': None,
+                'next_step': None,
+                'image': None
+            },
+        }
+    },
+}
+
+DEFAULT_ANSWER = 'Не знаю как на это ответить!\n ' \
+                 'Могу ответить когда и где пройдет конференция, а также зарегистрировать.\n Просто спросите!'
+
+DEFAULT_IMAGE = 'images\\ask_me.jpg'

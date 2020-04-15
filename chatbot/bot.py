@@ -2,29 +2,163 @@
 """
     Эхобот для VK
 """
+import os
 import random
 import logging
-from dataclasses import dataclass, field
+from typing import Optional
 import handlers
+import requests
+import peewee as pw
 
 import vk_api
+from playhouse.db_url import connect
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
+from chatbot.image_filler import ImageFiller, ImageFillerPlaceholder
+
 try:
-    from settings import TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER
+    from settings import TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER, DEFAULT_IMAGE
 except ImportError:
-    TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER = '', '', {}, [], ''
+    TOKEN, GROUP_ID, SCENARIOS, INTENTS, DEFAULT_ANSWER, DEFAULT_IMAGE = '', '', {}, [], '', ''
     exit('Please copy settings.py.default to setting.py and add your token and group_id into it.')
 
 
-@dataclass
-class UserState:
+class UserInformation:
     """
-        Дата-класс, содержит информацию о пользователе.
+        Класс содержит информацию о пользователе
     """
-    scenario_name: str
-    step_name: str
-    context: dict = field(default_factory=dict)
+    db: pw.SqliteDatabase
+    db_proxy: pw.DatabaseProxy
+    record: Optional[pw.Model] = None
+
+    def __init__(self):
+        self.db_proxy = pw.DatabaseProxy()
+        self.db = connect('sqlite:///vk_bot_users.db')
+        self.db_proxy.initialize(self.db)
+
+        class BaseModel(pw.Model):
+            """
+                Базовая модель
+            """
+            class Meta:
+                """
+                    Настройка покдлючения к базе данных
+                """
+                database = self.db_proxy
+
+        class User(BaseModel):
+            """
+                Модель для работы с таблицей пользователей
+            """
+            user_id = pw.IntegerField()
+            first_name = pw.CharField()
+            last_name = pw.CharField()
+            full_name = pw.CharField()
+            email = pw.CharField()
+            city = pw.CharField()
+            photo = pw.CharField()
+            scenario_name = pw.CharField()
+            step_name = pw.CharField()
+
+        class RegisteredUser(BaseModel):
+            """
+                Модель для работы с зарегистрированными пользователями
+            """
+            user_id = pw.IntegerField()
+            first_name = pw.CharField()
+            last_name = pw.CharField()
+            full_name = pw.CharField()
+            email = pw.CharField()
+            city = pw.CharField()
+            photo = pw.CharField()
+            ticket = pw.CharField()
+
+        self.db.create_tables([User, RegisteredUser])
+        self.model = User
+        self.registered_user = RegisteredUser
+
+    def insert(self, user_id: int, user_info: dict, scenario: str = "", step: str = ""):
+        """
+            Метод вставляет запись в таблицу.
+            Возвращает вставленную запись и индикатор новой записи (True если запись новая
+            False если запись уже существует)
+        :return:
+        """
+        return self.model.get_or_create(user_id=user_id,
+                                        defaults={'first_name': user_info['first_name'],
+                                                  'last_name': user_info['last_name'],
+                                                  'full_name': "",
+                                                  'email': "",
+                                                  'city': user_info['city_title'],
+                                                  'photo': user_info['photo'],
+                                                  'scenario_name': scenario, 'step_name': step
+                                                  })
+
+    def select(self, user_id: int):
+        """
+            Ищет в таблице пользователя с указанным ID
+            В случае успеха возвращает его запись
+        :param user_id: ID полтзователя
+        :return:
+        """
+
+        try:
+            self.record = self.model.get(user_id=user_id)
+            return self.record
+        except pw.DoesNotExist:
+            return False
+
+    def delete(self, user_id: int):
+        """
+            Метод удаляет запись из таблицы
+        :return:
+        """
+        query = self.model.delete().where(self.model.user_id == user_id)
+        query.execute()
+
+    def update(self):
+        """
+            Метод обновляет запись в таблице
+        :return:
+        """
+        pass
+
+    def register_user(self, ticket: str):
+        """
+            Заносит пользователя в таблицу зарегистрированных пользователей
+        :return:
+        """
+        user = self.registered_user()
+
+        user.user_id = self.model.user_id
+        user.first_name = self.model.first_name
+        user.last_name = self.model.last_name
+        user.full_name = self.model.full_name
+        user.email = self.model.email
+        user.city = self.model.city
+        user.photo = self.model.photo
+        user.ticket = ticket
+
+        user.save()
+
+    def info(self):
+        """
+            Возвращает запись ввиде словаря
+        :return: dict
+        """
+        if self.record:
+            return {'user_id': self.record.user_id,
+                    'first_name': self.record.first_name,
+                    'last_name': self.record.last_name,
+                    'full_name': self.record.full_name,
+                    'email': self.record.email,
+                    'city': self.record.city,
+                    'photo': self.record.photo,
+                    'scenario_name': self.record.scenario_name,
+                    'step_name': self.record.step_name,
+                    }
+        else:
+            return False
 
 
 class EchoBot:
@@ -39,7 +173,7 @@ class EchoBot:
     vk_long_pol: vk_api.bot_longpoll.VkBotLongPoll
     api: vk_api.vk_api.VkApiMethod
     logger: logging.Logger
-    user_states: dict
+    user_states: UserInformation
 
     def __init__(self, group, token):
         self.group_id = group
@@ -50,7 +184,7 @@ class EchoBot:
         self.long_poll = VkBotLongPoll(self.vk, self.group_id)
         self.api = self.vk.get_api()
         self.group_title = self.get_group_title()
-        self.user_states = {}
+        self.user_states = UserInformation()
 
         self.__logger_customizer()
 
@@ -112,13 +246,15 @@ class EchoBot:
         :return: Словарь с информацией о пользователе
         """
 
-        sender = self.api.users.get(user_ids=user_id, fields='city,nickname')
+        sender = self.api.users.get(user_ids=user_id, fields='city,nickname,photo_200,crop_photo')
 
         sender_info = {
             'first_name': sender[0]['first_name'],
             'last_name': sender[0]['last_name'],
             'nickname': sender[0]['nickname'],
             'city_title': sender[0]['city']['title'],
+            'photo': sender[0]['photo_200'],
+            'crop_photo': sender[0]['crop_photo']
         }
 
         return sender_info
@@ -170,15 +306,19 @@ class EchoBot:
                 self.logger.debug(f'Отправили пользователю {user_full_name} следующее сообщение: "{message}"')
                 return self.send_message_to_user(message=message, user_id=member_id)
 
-    def send_message_to_user(self, user_id: int, message: str = None):
+    def send_message_to_user(self, user_id: int, message: str = None, attachment: str = None):
         """
             Метод посылает сообщение message пользователю с user_id
         :param user_id: ID пользователя
         :param message: Сообщение
+        :param attachment: Аттачмент
         :return: None
         """
 
-        return self.api.messages.send(message=message, random_id=random.randint(0, 2 ** 20), user_id=user_id)
+        return self.api.messages.send(message=message,
+                                      random_id=random.randint(0, 2 ** 20),
+                                      user_id=user_id,
+                                      attachment=attachment)
 
     def send_greetings(self, user_id):
         """
@@ -205,6 +345,25 @@ class EchoBot:
 
         return self.send_message_to_user(message=message, user_id=user_id)
 
+    def upload_image(self, image: str) -> str:
+        """
+            Загружает изображение на сервер и возвращает ссылку на него.
+        :return: str
+        """
+        attachment = None
+
+        name = image.split('\\')[-1]
+        path = os.getcwd()
+        file = os.path.join(path, image)
+        if os.path.isfile(file):
+            file_handler = open(file=file, mode='rb')
+            url = self.api.photos.getMessagesUploadServer()['upload_url']
+            response = requests.post(url=url, files={'photo': (name, file_handler, f'image/{name.split(".")[-1]}')})
+            image_data = self.api.photos.saveMessagesPhoto(**response.json())
+            attachment = f'photo{image_data[0]["owner_id"]}_{image_data[0]["id"]}'
+
+        return attachment
+
     def on_event(self, event):
         """
             Метод реагирует на события
@@ -220,29 +379,40 @@ class EchoBot:
 
         user_id: int = event.object.peer_id
         text: str = event.object.text
+        attachment: Optional[str] = None
 
-        if user_id in self.user_states:
-            text_to_send = self.continue_scenario(user_id, text=event.object.text)
+        user_info = self.get_user_info(user_id=user_id)
+
+        record = self.user_states.select(user_id=user_id)
+
+        if record:
+            text_to_send = self.continue_scenario(record, text=event.object.text)
         else:
             # Ищем в интентах введенный пользователем текст
             for intent in INTENTS:
                 self.logger.debug(f'Проверяем на совпадение с {intent}')
                 if any(token in text.lower() for token in intent['tokens']):
                     if intent['answer']:
-                        text_to_send = intent['answer']
+                        text_to_send = intent['answer'].format(**{'first_name': user_info['first_name'],
+                                                                  'last_name': user_info['last_name']})
                     else:
-                        text_to_send = self.start_scenario(user_id, intent['scenario'])
+                        text_to_send = self.start_scenario(user_id, user_info, intent['scenario'])
+
+                    if intent['image']:
+                        attachment = self.upload_image(image=intent['image'])
 
                     break
             else:
                 text_to_send = DEFAULT_ANSWER
+                attachment = self.upload_image(DEFAULT_IMAGE)
 
-        self.send_message_to_user(message=text_to_send, user_id=user_id)
+        self.send_message_to_user(message=text_to_send, user_id=user_id, attachment=attachment)
 
-    def start_scenario(self, user_id, scenario_name):
+    def start_scenario(self, user_id, user_info, scenario_name):
         """
             Start scenario
         :param user_id: Идентификатор пользователя
+        :param user_info: Информация о пользователе
         :param scenario_name: Наименование сценария
         :return: Текст для отправки пользователю
         """
@@ -251,39 +421,176 @@ class EchoBot:
         step = scenario['steps'][first_step]
         text_to_send = step['text']
 
-        self.user_states[user_id] = UserState(scenario_name=scenario_name, step_name=first_step)
+        record, _ = self.user_states.insert(user_id=user_id,
+                                            user_info=user_info,
+                                            scenario=scenario_name,
+                                            step=first_step)
 
-        return text_to_send
+        # self.user_states[user_id] = UserState(scenario_name=scenario_name, step_name=first_step)
 
-    def continue_scenario(self, user_id, text):
+        return text_to_send.format(**{'first_name': record.first_name, 'last_name': record.last_name})
+
+    def continue_scenario(self, record: pw.Model, text):
         """
             Продолжение сценария
-        :param user_id: ID пользователя
+        :param record: ID пользователя
         :param text: Текст полученный от пользователя
         :return: text_to_send - Текст для отправки пользователю
         """
-        state = self.user_states[user_id]
-        steps = SCENARIOS[state.scenario_name]['steps']
-        step = steps[state.step_name]
+        steps = SCENARIOS[record.scenario_name]['steps']
+        step = steps[record.step_name]
 
         try:
             handler = getattr(handlers, step['handler'])
         except AttributeError as exc:
-            self.logger.info(f'Неправильный хандлер при обработке шага {state.step_name}, {exc}')
+            self.logger.info(f'Неправильный хандлер при обработке шага {record.step_name}, {exc}')
             return 'Возникла ошибка при обработке входных данных. Приносим свои извинения.'
 
-        if handler(text=text, context=state.context):
+        if handler(text=text, context=record):
             next_step = steps[step['next_step']]
-            text_to_send = next_step['text'].format(**state.context)
+            text_to_send = next_step['text'].format(**self.user_states.info())
             if next_step['next_step']:
-                state.step_name = step['next_step']
+                record.step_name = step['next_step']
             else:
-                self.logger.info('Зарегистрирован пользователь: {name} <{email}>'.format(**state.context))
-                self.user_states.pop(user_id)
+                self.logger.info('Зарегистрирован пользователь: {full_name} <{email}>'.format(
+                    **self.user_states.info()))
+
+                attachment = self.upload_image(self.create_ticket())
+
+                self.send_message_to_user(message='Ваш билет, он же бейджик:',
+                                          user_id=self.user_states.info()['user_id'],
+                                          attachment=attachment
+                                          )
+                self.user_states.register_user(attachment)
+                self.user_states.delete(user_id=record.user_id)
         else:
-            text_to_send = step['failure_text'].format(**state.context)
+            text_to_send = step['failure_text'].format(**self.user_states.info())
+
+        record.save()
 
         return text_to_send
+
+    def create_ticket(self):
+        """
+            Метод создает билет для пользователя
+        :return:
+        """
+
+        name = self.user_states.info()['full_name']
+        email = self.user_states.info()['email']
+
+        photo = requests.get(url=self.user_states.info()['photo'])
+        with open('photo.jpg', 'wb') as file:
+            file.write(photo.content)
+
+        ticket = SkillBoxTicket()
+        ticket.values('photo.jpg', name, email)
+        ticket.placeholder_replacement()
+        ticket.template.enhance()
+        filename = f'images\\{self.user_states.info()["user_id"]}.jpg'
+        ticket.template.save_to(filename)
+
+        return filename
+
+
+class SkillBoxTicket:
+    """
+        Класс создает билет для посещения конференции Skillbox
+    """
+    template: ImageFiller
+    _photo: ImageFillerPlaceholder
+    _name: ImageFillerPlaceholder
+    _email: ImageFillerPlaceholder
+
+    def __init__(self):
+        path_to_template = 'images\\ticket.jpg'
+        self.template = ImageFiller(path_to_template)
+
+        self.photo = self.template.placeholder('photo')
+        self.photo.type = 'image'
+
+        self.name = self.template.placeholder('first_name')
+
+        self.name.font.font_face = 5
+        self.name.font.font_scale = 2
+        self.name.font.font_color = (255, 255, 255)
+        self.name.font.font_thickness = 2
+
+        self.email = self.template.placeholder('last_name')
+
+        self.email.font.font_face = 5
+        self.email.font.font_scale = 1
+        self.email.font.font_color = (255, 255, 255)
+        self.email.font.font_thickness = 2
+
+    @property
+    def photo(self) -> ImageFillerPlaceholder:
+        """
+            Плейсхолдер для фотографии
+        :return: self._photo
+        """
+        return self._photo
+
+    @photo.setter
+    def photo(self, placeholder: ImageFillerPlaceholder):
+        self._photo = placeholder
+
+    @property
+    def name(self) -> ImageFillerPlaceholder:
+        """
+            Плейсхолдер для имени
+        :return: self._name
+        """
+        return self._name
+
+    @name.setter
+    def name(self, placeholder: ImageFillerPlaceholder):
+        self._name = placeholder
+
+    @property
+    def email(self) -> ImageFillerPlaceholder:
+        """
+            Плейсхолдер для фамилии
+        :return: self._email
+        """
+        return self._email
+
+    @email.setter
+    def email(self, placeholder: ImageFillerPlaceholder):
+        self._email = placeholder
+
+    def values(self, foto: str, name: str, email: str):
+        """
+            Устанавливает значения плейсхолдеров
+        :param foto: Имя файла с картинкой
+        :param name: Имя пользователя
+        :param email: Фамилия пользователя
+        :return: None
+        """
+        self.photo.value = foto
+        self.name.value = name
+        self.email.value = email
+        self.placeholder_replacement()
+
+    def placeholder_replacement(self):
+        """
+            Размещает плейсхолдеры с учетом их размеров
+        :return:
+        """
+        self.photo.place = (int(self.template.size()[0]/2-self.photo.size()[0]/2),
+                            int(self.template.size()[1]/2-self.photo.size()[1]/2))
+
+        self.name.place = (int(self.template.size()[1]/2-self.name.size()[0][0]/2), 550)
+
+        self.email.place = (int(self.template.size()[1]/2-self.email.size()[0][0]/2), 600)
+
+    def display(self):
+        """
+            Выводит на экран полученный билет.
+        :return:
+        """
+        self.template.enhance()
+        self.template.display()
 
 
 def main():
